@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/admin/Sidebar';
 import { TopNavigation } from '@/components/admin/TopNavigation';
 import { Dashboard } from '@/components/admin/Dashboard';
 import { MerchantManagement } from '@/components/admin/MerchantManagement';
+import { MerchantDetails } from '@/components/admin/MerchantDetails';
 import { SubscriptionPlan } from '@/components/admin/SubscriptionPlan';
 import { Payouts } from '@/components/admin/Payouts';
 import { DomainBranding } from '@/components/admin/DomainBranding';
@@ -16,13 +17,22 @@ import { PlatformSettings } from '@/components/admin/PlatformSettings';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<number | null>(null);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
       case 'merchants':
-        return <MerchantManagement />;
+        return <MerchantManagement onViewDetails={(merchantId) => {
+          setSelectedMerchantId(merchantId);
+          setActiveTab('merchant-details');
+        }} />;
+      case 'merchant-details':
+        return <MerchantDetails 
+          merchantId={selectedMerchantId} 
+          onBack={() => setActiveTab('merchants')} 
+        />;
       case 'subscription':
         return <SubscriptionPlan />;
       case 'payouts':

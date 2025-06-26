@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Edit, DollarSign, Percent, CreditCard } from 'lucide-react';
+import { Edit, DollarSign, Percent } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -65,7 +65,7 @@ export const SubscriptionPlan: React.FC = () => {
         <p className="text-gray-600">Manage platform pricing and merchant billing</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -149,34 +149,6 @@ export const SubscriptionPlan: React.FC = () => {
                 </div>
               </DialogContent>
             </Dialog>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <CreditCard className="w-5 h-5 mr-2 text-purple-600" />
-              Stripe Integration
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Status</span>
-                <Badge className="bg-green-100 text-green-800">Connected</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Mode</span>
-                <Badge variant="outline">Live</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Webhooks</span>
-                <Badge className="bg-green-100 text-green-800">Active</Badge>
-              </div>
-            </div>
-            <Button variant="outline" size="sm" className="w-full mt-4">
-              Manage Stripe
-            </Button>
           </CardContent>
         </Card>
       </div>

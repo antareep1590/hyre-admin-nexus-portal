@@ -19,9 +19,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-export const MerchantManagement: React.FC = () => {
+interface MerchantManagementProps {
+  onViewDetails: (merchantId: number) => void;
+}
+
+export const MerchantManagement: React.FC<MerchantManagementProps> = ({ onViewDetails }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedMerchant, setSelectedMerchant] = useState<any>(null);
 
   const merchants = [
     {
@@ -58,10 +61,6 @@ export const MerchantManagement: React.FC = () => {
       lastActive: '1 week ago',
     },
   ];
-
-  const handleViewDetails = (merchant: any) => {
-    setSelectedMerchant(merchant);
-  };
 
   const handleSuspendMerchant = (merchantId: number) => {
     console.log('Suspending merchant:', merchantId);
@@ -175,7 +174,7 @@ export const MerchantManagement: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleViewDetails(merchant)}
+                          onClick={() => onViewDetails(merchant.id)}
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           View Details
@@ -215,59 +214,6 @@ export const MerchantManagement: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
-      {selectedMerchant && (
-        <Dialog open={!!selectedMerchant} onOpenChange={() => setSelectedMerchant(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{selectedMerchant.name} - Details</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6 pt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-2">Account Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Email:</span> {selectedMerchant.email}</p>
-                    <p><span className="font-medium">Domain:</span> {selectedMerchant.domain}</p>
-                    <p><span className="font-medium">Business Type:</span> {selectedMerchant.businessType}</p>
-                    <p><span className="font-medium">Last Active:</span> {selectedMerchant.lastActive}</p>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-2">Performance</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Total Revenue:</span> {selectedMerchant.revenue}</p>
-                    <p><span className="font-medium">Status:</span> 
-                      <Badge className="ml-2" variant={selectedMerchant.status === 'active' ? 'default' : 'secondary'}>
-                        {selectedMerchant.status}
-                      </Badge>
-                    </p>
-                    <p><span className="font-medium">Created:</span> {selectedMerchant.createdDate}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">Recent Activity</h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <p className="text-sm text-gray-600">• Updated intake forms (2 hours ago)</p>
-                  <p className="text-sm text-gray-600">• Processed 3 consultations (1 day ago)</p>
-                  <p className="text-sm text-gray-600">• Made subscription payment (5 days ago)</p>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setSelectedMerchant(null)}>
-                  Close
-                </Button>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  Edit Merchant
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };
