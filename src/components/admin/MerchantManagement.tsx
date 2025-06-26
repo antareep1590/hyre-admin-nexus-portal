@@ -4,20 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Eye, Plus, Search, MoreVertical, UserCheck, UserX } from 'lucide-react';
+import { Eye, Search, MoreVertical, UserCheck, UserX } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 
 interface MerchantManagementProps {
   onViewDetails: (merchantId: number) => void;
@@ -77,37 +70,6 @@ export const MerchantManagement: React.FC<MerchantManagementProps> = ({ onViewDe
           <h1 className="text-2xl font-bold text-gray-900">Merchant Management</h1>
           <p className="text-gray-600">Manage all merchant accounts and their platform access</p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Merchant
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Create New Merchant</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Business Name</label>
-                <Input placeholder="Enter business name" className="mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Email Address</label>
-                <Input type="email" placeholder="admin@business.com" className="mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Business Type</label>
-                <Input placeholder="e.g., Medical Clinic, Gym, etc." className="mt-1" />
-              </div>
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline">Cancel</Button>
-                <Button className="bg-blue-600 hover:bg-blue-700">Create Merchant</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
 
       <Card>

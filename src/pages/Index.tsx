@@ -12,7 +12,7 @@ import { TemplateLibrary } from '@/components/admin/TemplateLibrary';
 import { ActivityLogs } from '@/components/admin/ActivityLogs';
 import { SupportBroadcasts } from '@/components/admin/SupportBroadcasts';
 import { ComplianceCenter } from '@/components/admin/ComplianceCenter';
-import { PlatformSettings } from '@/components/admin/PlatformSettings';
+import { AdminTeam } from '@/components/admin/AdminTeam';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -47,8 +47,8 @@ const Index = () => {
         return <SupportBroadcasts />;
       case 'compliance':
         return <ComplianceCenter />;
-      case 'settings':
-        return <PlatformSettings />;
+      case 'admin-team':
+        return <AdminTeam />;
       default:
         return <Dashboard />;
     }

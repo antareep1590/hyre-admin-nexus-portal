@@ -10,7 +10,7 @@ import {
   Activity, 
   MessageSquare, 
   ShieldCheck, 
-  Settings,
+  UserCog,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -33,7 +33,7 @@ const menuItems = [
   { id: 'activity', label: 'Activity Logs', icon: Activity },
   { id: 'support', label: 'Support & Broadcasts', icon: MessageSquare },
   { id: 'compliance', label: 'Compliance Center', icon: ShieldCheck },
-  { id: 'settings', label: 'Platform Settings', icon: Settings },
+  { id: 'admin-team', label: 'Admin Team', icon: UserCog },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
