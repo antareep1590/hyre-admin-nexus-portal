@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,8 +21,9 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Search, Edit, Package, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Package, Eye, Upload, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProductDetails } from './ProductDetails';
 
 interface DosageOption {
   id: number;
@@ -51,6 +51,7 @@ interface Product {
   relatedProductId?: number;
   status: 'Active' | 'Inactive';
   merchantsUsing: number;
+  lastUpdated: string;
 }
 
 const mockProducts: Product[] = [
@@ -58,7 +59,7 @@ const mockProducts: Product[] = [
     id: 1,
     name: "Semaglutide",
     category: "Weight Loss",
-    description: "A GLP-1 receptor agonist for weight management and diabetes control.",
+    description: "A GLP-1 receptor agonist for weight management and diabetes control. This medication helps regulate blood sugar levels and promotes significant weight loss through appetite suppression and improved insulin sensitivity.",
     benefits: ["Significant weight loss", "Improved blood sugar control", "Reduced appetite", "Better cardiovascular health"],
     sideEffects: ["Nausea", "Vomiting", "Diarrhea", "Constipation"],
     images: ["/placeholder.svg"],
@@ -73,13 +74,14 @@ const mockProducts: Product[] = [
       threeMonth: 849
     },
     status: "Active",
-    merchantsUsing: 15
+    merchantsUsing: 15,
+    lastUpdated: "2024-01-15"
   },
   {
     id: 2,
     name: "Tirzepatide",
     category: "Weight Loss",
-    description: "Dual GIP/GLP-1 receptor agonist for enhanced weight loss results.",
+    description: "Dual GIP/GLP-1 receptor agonist for enhanced weight loss results. This advanced medication combines two hormone pathways for superior glucose control and weight management.",
     benefits: ["Superior weight loss", "Excellent glucose control", "Improved insulin sensitivity"],
     sideEffects: ["Nausea", "Decreased appetite", "Vomiting", "Diarrhea"],
     images: ["/placeholder.svg"],
@@ -95,13 +97,14 @@ const mockProducts: Product[] = [
     },
     relatedProductId: 1,
     status: "Active",
-    merchantsUsing: 8
+    merchantsUsing: 8,
+    lastUpdated: "2024-01-12"
   },
   {
     id: 3,
     name: "NAD+ Therapy",
     category: "Anti-Aging",
-    description: "Cellular regeneration therapy for anti-aging and energy enhancement.",
+    description: "Cellular regeneration therapy for anti-aging and energy enhancement. NAD+ supports cellular repair processes and helps restore energy production at the mitochondrial level.",
     benefits: ["Increased energy", "Better sleep", "Improved cognitive function", "Cellular repair"],
     sideEffects: ["Mild fatigue initially", "Temporary headache", "Injection site reaction"],
     images: ["/placeholder.svg"],
@@ -115,7 +118,8 @@ const mockProducts: Product[] = [
       threeMonth: 569
     },
     status: "Inactive",
-    merchantsUsing: 3
+    merchantsUsing: 3,
+    lastUpdated: "2024-01-10"
   }
 ];
 
@@ -160,7 +164,8 @@ export const ManageProducts: React.FC = () => {
         ...option,
         id: Date.now() + index
       })),
-      merchantsUsing: 0
+      merchantsUsing: 0,
+      lastUpdated: new Date().toISOString().split('T')[0]
     };
     setProducts([...products, product]);
     resetNewProduct();
@@ -185,7 +190,11 @@ export const ManageProducts: React.FC = () => {
   const toggleProductStatus = (id: number) => {
     setProducts(products.map(product => 
       product.id === id 
-        ? { ...product, status: product.status === 'Active' ? 'Inactive' : 'Active' }
+        ? { 
+            ...product, 
+            status: product.status === 'Active' ? 'Inactive' : 'Active',
+            lastUpdated: new Date().toISOString().split('T')[0]
+          }
         : product
     ));
   };
@@ -259,11 +268,85 @@ export const ManageProducts: React.FC = () => {
     });
   };
 
+  const handleImageUpload = (files: FileList | null) => {
+    if (files) {
+      const fileArray = Array.from(files);
+      const imageUrls = fileArray.map(file => URL.createObjectURL(file));
+      setNewProduct({
+        ...newProduct,
+        images: [...newProduct.images, ...imageUrls]
+      });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setNewProduct({
+      ...newProduct,
+      images: newProduct.images.filter((_, i) => i !== index)
+    });
+  };
+
+  const handleViewProduct = (product: Product) => {
+    setViewingProduct(product);
+    setActiveTab('details');
+  };
+
+  const handleBackToList = () => {
+    setViewingProduct(null);
+    setActiveTab('list');
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    // Pre-fill form with existing values
+    setNewProduct({
+      name: product.name,
+      category: product.category,
+      description: product.description,
+      benefits: product.benefits,
+      sideEffects: product.sideEffects,
+      images: product.images,
+      dosageOptions: product.dosageOptions.map(({ id, ...rest }) => rest),
+      subscriptionPricing: product.subscriptionPricing,
+      relatedProductId: product.relatedProductId,
+      status: product.status
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingProduct) return;
+    const updatedProduct: Product = {
+      ...editingProduct,
+      ...newProduct,
+      dosageOptions: newProduct.dosageOptions.map((option, index) => ({
+        ...option,
+        id: editingProduct.dosageOptions[index]?.id || Date.now() + index
+      })),
+      lastUpdated: new Date().toISOString().split('T')[0]
+    };
+    setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
+    setEditingProduct(null);
+    resetNewProduct();
+    setIsAddModalOpen(false);
+  };
+
+  if (activeTab === 'details' && viewingProduct) {
+    return (
+      <ProductDetails
+        product={viewingProduct}
+        onBack={handleBackToList}
+        onEdit={handleEditProduct}
+        allProducts={products}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manage Products</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Products</h1>
           <p className="text-gray-600 mt-1">Platform-wide product catalog for merchant storefronts</p>
         </div>
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
@@ -275,11 +358,12 @@ export const ManageProducts: React.FC = () => {
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
+              <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
             </DialogHeader>
             <Tabs defaultValue="basic" className="w-full">
               <TabsList>
                 <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="images">Images</TabsTrigger>
                 <TabsTrigger value="dosage">Dosage & Pricing</TabsTrigger>
                 <TabsTrigger value="details">Benefits & Side Effects</TabsTrigger>
               </TabsList>
@@ -317,7 +401,7 @@ export const ManageProducts: React.FC = () => {
                     value={newProduct.description}
                     onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
                     placeholder="Enter detailed product description"
-                    rows={4}
+                    rows={6}
                   />
                 </div>
                 <div>
@@ -329,10 +413,64 @@ export const ManageProducts: React.FC = () => {
                     onChange={(e) => setNewProduct({...newProduct, relatedProductId: e.target.value ? parseInt(e.target.value) : undefined})}
                   >
                     <option value="">No related product</option>
-                    {products.map(product => (
+                    {products.filter(p => editingProduct ? p.id !== editingProduct.id : true).map(product => (
                       <option key={product.id} value={product.id}>{product.name}</option>
                     ))}
                   </select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={newProduct.status === 'Active'}
+                    onCheckedChange={(checked) => setNewProduct({...newProduct, status: checked ? 'Active' : 'Inactive'})}
+                  />
+                  <Label>Active Status</Label>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="images" className="space-y-4">
+                <div>
+                  <Label>Product Images</Label>
+                  <div className="mt-2">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500 mb-2">Upload product images</p>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e.target.files)}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label htmlFor="image-upload">
+                        <Button type="button" variant="outline" className="cursor-pointer">
+                          Select Images
+                        </Button>
+                      </label>
+                    </div>
+                    {newProduct.images.length > 0 && (
+                      <div className="grid grid-cols-4 gap-2 mt-4">
+                        {newProduct.images.map((image, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={image}
+                              alt={`Product ${index + 1}`}
+                              className="w-full aspect-square object-cover rounded-lg border"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-1 right-1 w-6 h-6 p-0"
+                              onClick={() => removeImage(index)}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </TabsContent>
 
@@ -511,214 +649,122 @@ export const ManageProducts: React.FC = () => {
             </Tabs>
             
             <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
+              <Button variant="outline" onClick={() => {
+                setIsAddModalOpen(false);
+                setEditingProduct(null);
+                resetNewProduct();
+              }}>
                 Cancel
               </Button>
-              <Button onClick={handleAddProduct}>
-                Add Product
+              <Button onClick={editingProduct ? handleSaveEdit : handleAddProduct}>
+                {editingProduct ? 'Save Changes' : 'Add Product'}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList>
-          <TabsTrigger value="list">Product List</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="list" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>All Products</CardTitle>
-                <div className="flex space-x-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      placeholder="Search products..."
-                      className="pl-10 w-64"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <select
-                    className="px-3 py-2 border border-gray-300 rounded-md"
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                  >
-                    <option value="all">All Categories</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                  <select
-                    className="px-3 py-2 border border-gray-300 rounded-md"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>All Products</CardTitle>
+            <div className="flex space-x-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search products..."
+                  className="pl-10 w-64"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Merchants Using</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProducts.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center">
-                          <Package className="w-4 h-4 mr-2 text-gray-500" />
-                          {product.name}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{product.category}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant={product.status === 'Active' ? 'default' : 'secondary'}>
-                            {product.status}
-                          </Badge>
-                          <Switch
-                            checked={product.status === 'Active'}
-                            onCheckedChange={() => toggleProductStatus(product.id)}
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell>{product.merchantsUsing}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setViewingProduct(product)}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setEditingProduct(product)}
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            Edit
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Product Detail View Modal */}
-      {viewingProduct && (
-        <Dialog open={!!viewingProduct} onOpenChange={() => setViewingProduct(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{viewingProduct.name} - Product Details</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-2">Basic Information</h3>
-                  <div className="space-y-2">
-                    <p><strong>Category:</strong> {viewingProduct.category}</p>
-                    <p><strong>Status:</strong> 
-                      <Badge className="ml-2" variant={viewingProduct.status === 'Active' ? 'default' : 'secondary'}>
-                        {viewingProduct.status}
-                      </Badge>
-                    </p>
-                    <p><strong>Merchants Using:</strong> {viewingProduct.merchantsUsing}</p>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Related Product</h3>
-                  {viewingProduct.relatedProductId ? (
-                    <p>{products.find(p => p.id === viewingProduct.relatedProductId)?.name || 'Unknown'}</p>
-                  ) : (
-                    <p className="text-gray-500">None</p>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-gray-700">{viewingProduct.description}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-2">Benefits</h3>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {viewingProduct.benefits.map((benefit, index) => (
-                      <li key={index} className="text-gray-700">{benefit}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Side Effects</h3>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {viewingProduct.sideEffects.map((sideEffect, index) => (
-                      <li key={index} className="text-gray-700">{sideEffect}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">Dosage Options</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {viewingProduct.dosageOptions.map((option) => (
-                    <div key={option.id} className="border rounded-lg p-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{option.label}</span>
-                        {option.isDefault && <Badge variant="secondary" className="text-xs">Default</Badge>}
-                      </div>
-                      <p className="text-lg font-bold text-green-600">${option.pricePerMonth}/month</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">Subscription Pricing</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 border rounded-lg">
-                    <p className="font-medium">1 Month</p>
-                    <p className="text-lg font-bold text-blue-600">${viewingProduct.subscriptionPricing.oneMonth}</p>
-                  </div>
-                  <div className="text-center p-3 border rounded-lg">
-                    <p className="font-medium">2 Months</p>
-                    <p className="text-lg font-bold text-blue-600">${viewingProduct.subscriptionPricing.twoMonth}</p>
-                  </div>
-                  <div className="text-center p-3 border rounded-lg">
-                    <p className="font-medium">3 Months</p>
-                    <p className="text-lg font-bold text-blue-600">${viewingProduct.subscriptionPricing.threeMonth}</p>
-                  </div>
-                </div>
-              </div>
+              <select
+                className="px-3 py-2 border border-gray-300 rounded-md"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                <option value="all">All Categories</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <select
+                className="px-3 py-2 border border-gray-300 rounded-md"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Merchants Using</TableHead>
+                <TableHead>Last Updated</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredProducts.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center">
+                      <Package className="w-4 h-4 mr-2 text-gray-500" />
+                      {product.name}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{product.category}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={product.status === 'Active' ? 'default' : 'secondary'}>
+                        {product.status}
+                      </Badge>
+                      <Switch
+                        checked={product.status === 'Active'}
+                        onCheckedChange={() => toggleProductStatus(product.id)}
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell>{product.merchantsUsing}</TableCell>
+                  <TableCell className="text-sm text-gray-500">
+                    {product.lastUpdated}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewProduct(product)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditProduct(product)}
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };
