@@ -13,6 +13,8 @@ import { ActivityLogs } from '@/components/admin/ActivityLogs';
 import { SupportBroadcasts } from '@/components/admin/SupportBroadcasts';
 import { ComplianceCenter } from '@/components/admin/ComplianceCenter';
 import { AdminTeam } from '@/components/admin/AdminTeam';
+import { ManagePharmacy } from '@/components/admin/ManagePharmacy';
+import { ManageProducts } from '@/components/admin/ManageProducts';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -49,6 +51,10 @@ const Index = () => {
         return <ComplianceCenter />;
       case 'admin-team':
         return <AdminTeam />;
+      case 'pharmacy':
+        return <ManagePharmacy />;
+      case 'products':
+        return <ManageProducts />;
       default:
         return <Dashboard />;
     }

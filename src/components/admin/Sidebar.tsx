@@ -12,7 +12,9 @@ import {
   ShieldCheck, 
   UserCog,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Building2,
+  Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -30,6 +32,8 @@ const menuItems = [
   { id: 'payouts', label: 'Payouts', icon: DollarSign },
   { id: 'domains', label: 'Domain & Branding', icon: Globe },
   { id: 'templates', label: 'Template Library', icon: FileText },
+  { id: 'pharmacy', label: 'Manage Pharmacy', icon: Building2 },
+  { id: 'products', label: 'Manage Products', icon: Package },
   { id: 'activity', label: 'Activity Logs', icon: Activity },
   { id: 'support', label: 'Support & Broadcasts', icon: MessageSquare },
   { id: 'compliance', label: 'Compliance Center', icon: ShieldCheck },
