@@ -4,13 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Eye, Search, MoreVertical, UserCheck, UserX } from 'lucide-react';
+import { Eye, Search, MoreVertical, UserCheck, UserX, Filter } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface MerchantManagementProps {
   onViewDetails: (merchantId: number) => void;
@@ -18,6 +25,9 @@ interface MerchantManagementProps {
 
 export const MerchantManagement: React.FC<MerchantManagementProps> = ({ onViewDetails }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [businessTypeFilter, setBusinessTypeFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
 
   const merchants = [
     {
@@ -55,6 +65,32 @@ export const MerchantManagement: React.FC<MerchantManagementProps> = ({ onViewDe
     },
   ];
 
+  const businessTypes = [...new Set(merchants.map(m => m.businessType))];
+
+  const filteredMerchants = merchants
+    .filter(merchant => {
+      const matchesSearch = merchant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           merchant.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           merchant.domain.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || merchant.status === statusFilter;
+      const matchesBusinessType = businessTypeFilter === 'all' || merchant.businessType === businessTypeFilter;
+      return matchesSearch && matchesStatus && matchesBusinessType;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'revenue':
+          return parseFloat(b.revenue.replace('$', '').replace(',', '')) - parseFloat(a.revenue.replace('$', '').replace(',', ''));
+        case 'created':
+          return new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime();
+        case 'lastActive':
+          return a.lastActive.localeCompare(b.lastActive);
+        default:
+          return 0;
+      }
+    });
+
   const handleSuspendMerchant = (merchantId: number) => {
     console.log('Suspending merchant:', merchantId);
   };
@@ -76,15 +112,54 @@ export const MerchantManagement: React.FC<MerchantManagementProps> = ({ onViewDe
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>All Merchants</CardTitle>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search merchants..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-64"
-              />
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search merchants..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 w-64"
+                />
+              </div>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-32">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={businessTypeFilter} onValueChange={setBusinessTypeFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Business Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {businessTypes.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="revenue">Revenue</SelectItem>
+                  <SelectItem value="created">Created Date</SelectItem>
+                  <SelectItem value="lastActive">Last Active</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
@@ -103,7 +178,7 @@ export const MerchantManagement: React.FC<MerchantManagementProps> = ({ onViewDe
                 </tr>
               </thead>
               <tbody>
-                {merchants.map((merchant) => (
+                {filteredMerchants.map((merchant) => (
                   <tr key={merchant.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div>
@@ -174,6 +249,12 @@ export const MerchantManagement: React.FC<MerchantManagementProps> = ({ onViewDe
               </tbody>
             </table>
           </div>
+          
+          {filteredMerchants.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No merchants found matching your search criteria.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

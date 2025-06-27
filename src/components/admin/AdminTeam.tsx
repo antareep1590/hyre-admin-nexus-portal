@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { UserCog, Plus, Edit, Shield, Eye, Users } from 'lucide-react';
+import { UserCog, Plus, Edit, Shield, Eye, Users, Search, Filter } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -68,12 +68,23 @@ export const AdminTeam: React.FC = () => {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
     role: '',
     status: 'Active',
     permissions: [] as string[],
+  });
+
+  const filteredUsers = adminUsers.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   const handleAddAdmin = () => {
@@ -234,7 +245,45 @@ export const AdminTeam: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Team Members</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Team Members</CardTitle>
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search team members..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 w-64"
+                />
+              </div>
+              
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
+                <SelectTrigger className="w-32">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="Owner">Owner</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Team Member">Team Member</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -250,7 +299,7 @@ export const AdminTeam: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {adminUsers.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div>
@@ -323,6 +372,12 @@ export const AdminTeam: React.FC = () => {
               </tbody>
             </table>
           </div>
+          
+          {filteredUsers.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No team members found matching your search criteria.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -3,26 +3,36 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Search, Edit, Building2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, Edit, MapPin, Phone, Mail, Search, Filter } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+
+const US_STATES = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
+  'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
+  'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+  'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
+  'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
+  'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+  'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+];
 
 interface Pharmacy {
   id: number;
@@ -31,201 +41,173 @@ interface Pharmacy {
   email: string;
   phone: string;
   address: string;
-  states: string[];
-  status: 'Active' | 'Inactive';
+  availableStates: string[];
   defaultForStates: string[];
-  lastUpdated: string;
+  status: 'Active' | 'Inactive';
+  createdDate: string;
 }
 
-const mockPharmacies: Pharmacy[] = [
-  {
-    id: 1,
-    name: "MedSupply Central",
-    npi: "1234567890",
-    email: "orders@medsupplycentral.com",
-    phone: "(555) 123-4567",
-    address: "123 Pharmacy St, Los Angeles, CA 90210",
-    states: ["CA", "NV", "AZ"],
-    status: "Active",
-    defaultForStates: ["CA", "NV"],
-    lastUpdated: "2024-01-15"
-  },
-  {
-    id: 2,
-    name: "East Coast Pharmacy",
-    npi: "0987654321",
-    email: "info@eastcoastpharm.com",
-    phone: "(555) 987-6543",
-    address: "456 Medical Ave, New York, NY 10001",
-    states: ["NY", "NJ", "CT"],
-    status: "Active",
-    defaultForStates: ["NY"],
-    lastUpdated: "2024-01-12"
-  },
-  {
-    id: 3,
-    name: "Texas Health Supply",
-    npi: "1122334455",
-    email: "contact@txhealthsupply.com",
-    phone: "(555) 555-0123",
-    address: "789 Health Blvd, Houston, TX 77001",
-    states: ["TX", "OK", "LA"],
-    status: "Inactive",
-    defaultForStates: [],
-    lastUpdated: "2024-01-10"
-  }
-];
-
-const US_STATES = [
-  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
-  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
-];
-
 export const ManagePharmacy: React.FC = () => {
-  const [pharmacies, setPharmacies] = useState<Pharmacy[]>(mockPharmacies);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([
+    {
+      id: 1,
+      name: 'HealthPlus Pharmacy',
+      npi: '1234567890',
+      email: 'admin@healthplus.com',
+      phone: '(555) 123-4567',
+      address: '123 Main St, New York, NY 10001',
+      availableStates: ['New York', 'New Jersey', 'Connecticut'],
+      defaultForStates: ['New York'],
+      status: 'Active',
+      createdDate: '2024-01-15',
+    },
+    {
+      id: 2,
+      name: 'MediCare Solutions',
+      npi: '0987654321',
+      email: 'contact@medicare-sol.com',
+      phone: '(555) 987-6543',
+      address: '456 Oak Ave, Los Angeles, CA 90210',
+      availableStates: ['California', 'Nevada', 'Arizona'],
+      defaultForStates: ['California', 'Nevada'],
+      status: 'Active',
+      createdDate: '2024-02-20',
+    },
+    {
+      id: 3,
+      name: 'Wellness Pharmacy',
+      npi: '1122334455',
+      email: 'info@wellnessrx.com',
+      phone: '(555) 555-0123',
+      address: '789 Pine St, Chicago, IL 60601',
+      availableStates: ['Illinois', 'Wisconsin', 'Indiana'],
+      defaultForStates: [],
+      status: 'Inactive',
+      createdDate: '2024-03-10',
+    },
+  ]);
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingPharmacy, setEditingPharmacy] = useState<Pharmacy | null>(null);
-
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [stateFilter, setStateFilter] = useState('all');
   const [newPharmacy, setNewPharmacy] = useState({
     name: '',
     npi: '',
     email: '',
     phone: '',
     address: '',
-    states: [] as string[],
+    availableStates: [] as string[],
+    defaultForStates: [] as string[],
     status: 'Active' as 'Active' | 'Inactive',
-    defaultForStates: [] as string[]
   });
 
+  const availableStates = [...new Set(pharmacies.flatMap(p => p.availableStates))];
+
   const filteredPharmacies = pharmacies.filter(pharmacy => {
-    const matchesSearch = pharmacy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pharmacy.npi.includes(searchTerm) ||
-                         pharmacy.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || pharmacy.status.toLowerCase() === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesSearch = pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         pharmacy.npi.includes(searchQuery) ||
+                         pharmacy.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || pharmacy.status === statusFilter;
+    const matchesState = stateFilter === 'all' || pharmacy.availableStates.includes(stateFilter);
+    return matchesSearch && matchesStatus && matchesState;
   });
 
   const handleAddPharmacy = () => {
     const pharmacy: Pharmacy = {
       id: Math.max(...pharmacies.map(p => p.id)) + 1,
       ...newPharmacy,
-      lastUpdated: new Date().toISOString().split('T')[0]
+      createdDate: new Date().toISOString().split('T')[0],
     };
     setPharmacies([...pharmacies, pharmacy]);
-    resetNewPharmacy();
+    resetForm();
     setIsAddModalOpen(false);
   };
 
-  const resetNewPharmacy = () => {
+  const handleEditPharmacy = (pharmacy: Pharmacy) => {
+    setEditingPharmacy(pharmacy);
+    setNewPharmacy({
+      name: pharmacy.name,
+      npi: pharmacy.npi,
+      email: pharmacy.email,
+      phone: pharmacy.phone,
+      address: pharmacy.address,
+      availableStates: [...pharmacy.availableStates],
+      defaultForStates: [...pharmacy.defaultForStates],
+      status: pharmacy.status,
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingPharmacy) return;
+    const updatedPharmacy: Pharmacy = {
+      ...editingPharmacy,
+      ...newPharmacy,
+    };
+    setPharmacies(pharmacies.map(p => p.id === editingPharmacy.id ? updatedPharmacy : p));
+    setEditingPharmacy(null);
+    resetForm();
+    setIsAddModalOpen(false);
+  };
+
+  const resetForm = () => {
     setNewPharmacy({
       name: '',
       npi: '',
       email: '',
       phone: '',
       address: '',
-      states: [],
+      availableStates: [],
+      defaultForStates: [],
       status: 'Active',
-      defaultForStates: []
     });
   };
 
-  const handleEditPharmacy = (pharmacy: Pharmacy) => {
-    setEditingPharmacy({...pharmacy});
+  const handleStateChange = (state: string, checked: boolean) => {
+    if (checked) {
+      setNewPharmacy(prev => ({
+        ...prev,
+        availableStates: [...prev.availableStates, state]
+      }));
+    } else {
+      setNewPharmacy(prev => ({
+        ...prev,
+        availableStates: prev.availableStates.filter(s => s !== state),
+        defaultForStates: prev.defaultForStates.filter(s => s !== state)
+      }));
+    }
   };
 
-  const handleSaveEdit = () => {
-    if (!editingPharmacy) return;
-    const updatedPharmacy = {
-      ...editingPharmacy,
-      lastUpdated: new Date().toISOString().split('T')[0]
-    };
-    setPharmacies(pharmacies.map(p => p.id === editingPharmacy.id ? updatedPharmacy : p));
-    setEditingPharmacy(null);
+  const handleDefaultStateChange = (state: string, checked: boolean) => {
+    if (checked) {
+      setNewPharmacy(prev => ({
+        ...prev,
+        defaultForStates: [...prev.defaultForStates, state]
+      }));
+    } else {
+      setNewPharmacy(prev => ({
+        ...prev,
+        defaultForStates: prev.defaultForStates.filter(s => s !== state)
+      }));
+    }
   };
 
   const togglePharmacyStatus = (id: number) => {
-    setPharmacies(pharmacies.map(pharmacy => 
-      pharmacy.id === id 
-        ? { 
-            ...pharmacy, 
-            status: pharmacy.status === 'Active' ? 'Inactive' : 'Active',
-            lastUpdated: new Date().toISOString().split('T')[0]
-          }
+    setPharmacies(pharmacies.map(pharmacy =>
+      pharmacy.id === id
+        ? { ...pharmacy, status: pharmacy.status === 'Active' ? 'Inactive' : 'Active' }
         : pharmacy
     ));
   };
 
-  const handleStateToggle = (state: string, isSelected: boolean, isForDefaults = false) => {
-    if (isForDefaults) {
-      if (isSelected) {
-        setNewPharmacy({
-          ...newPharmacy,
-          defaultForStates: [...newPharmacy.defaultForStates, state]
-        });
-      } else {
-        setNewPharmacy({
-          ...newPharmacy,
-          defaultForStates: newPharmacy.defaultForStates.filter(s => s !== state)
-        });
-      }
-    } else {
-      if (isSelected) {
-        setNewPharmacy({
-          ...newPharmacy,
-          states: [...newPharmacy.states, state]
-        });
-      } else {
-        setNewPharmacy({
-          ...newPharmacy,
-          states: newPharmacy.states.filter(s => s !== state),
-          defaultForStates: newPharmacy.defaultForStates.filter(s => s !== state)
-        });
-      }
-    }
-  };
-
-  const handleEditStateToggle = (state: string, isSelected: boolean, isForDefaults = false) => {
-    if (!editingPharmacy) return;
-    
-    if (isForDefaults) {
-      if (isSelected) {
-        setEditingPharmacy({
-          ...editingPharmacy,
-          defaultForStates: [...editingPharmacy.defaultForStates, state]
-        });
-      } else {
-        setEditingPharmacy({
-          ...editingPharmacy,
-          defaultForStates: editingPharmacy.defaultForStates.filter(s => s !== state)
-        });
-      }
-    } else {
-      if (isSelected) {
-        setEditingPharmacy({
-          ...editingPharmacy,
-          states: [...editingPharmacy.states, state]
-        });
-      } else {
-        setEditingPharmacy({
-          ...editingPharmacy,
-          states: editingPharmacy.states.filter(s => s !== state),
-          defaultForStates: editingPharmacy.defaultForStates.filter(s => s !== state)
-        });
-      }
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Pharmacy</h1>
-          <p className="text-gray-600 mt-1">Manage all pharmacies available on the platform</p>
+          <h1 className="text-2xl font-bold text-gray-900">Pharmacy</h1>
+          <p className="text-gray-600">Manage pharmacy partners and their service areas</p>
         </div>
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
@@ -234,11 +216,11 @@ export const ManagePharmacy: React.FC = () => {
               Add Pharmacy
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Add New Pharmacy</DialogTitle>
+              <DialogTitle>{editingPharmacy ? 'Edit Pharmacy' : 'Add New Pharmacy'}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-6 pt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Pharmacy Name</Label>
@@ -247,6 +229,7 @@ export const ManagePharmacy: React.FC = () => {
                     value={newPharmacy.name}
                     onChange={(e) => setNewPharmacy({...newPharmacy, name: e.target.value})}
                     placeholder="Enter pharmacy name"
+                    className="mt-1"
                   />
                 </div>
                 <div>
@@ -256,9 +239,11 @@ export const ManagePharmacy: React.FC = () => {
                     value={newPharmacy.npi}
                     onChange={(e) => setNewPharmacy({...newPharmacy, npi: e.target.value})}
                     placeholder="Enter NPI number"
+                    className="mt-1"
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="email">Contact Email</Label>
@@ -267,7 +252,8 @@ export const ManagePharmacy: React.FC = () => {
                     type="email"
                     value={newPharmacy.email}
                     onChange={(e) => setNewPharmacy({...newPharmacy, email: e.target.value})}
-                    placeholder="Enter contact email"
+                    placeholder="contact@pharmacy.com"
+                    className="mt-1"
                   />
                 </div>
                 <div>
@@ -276,67 +262,87 @@ export const ManagePharmacy: React.FC = () => {
                     id="phone"
                     value={newPharmacy.phone}
                     onChange={(e) => setNewPharmacy({...newPharmacy, phone: e.target.value})}
-                    placeholder="Enter phone number"
+                    placeholder="(555) 123-4567"
+                    className="mt-1"
                   />
                 </div>
               </div>
+
               <div>
                 <Label htmlFor="address">Address</Label>
                 <Textarea
                   id="address"
                   value={newPharmacy.address}
                   onChange={(e) => setNewPharmacy({...newPharmacy, address: e.target.value})}
-                  placeholder="Enter full address"
+                  placeholder="Enter complete address"
+                  className="mt-1"
+                  rows={3}
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={newPharmacy.status === 'Active'}
-                  onCheckedChange={(checked) => setNewPharmacy({...newPharmacy, status: checked ? 'Active' : 'Inactive'})}
-                />
-                <Label>Active Status</Label>
-              </div>
+
               <div>
                 <Label>Available States</Label>
-                <div className="grid grid-cols-8 gap-2 mt-2 max-h-32 overflow-y-auto border rounded p-2">
-                  {US_STATES.map(state => (
-                    <div key={state} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`state-${state}`}
-                        checked={newPharmacy.states.includes(state)}
-                        onChange={(e) => handleStateToggle(state, e.target.checked)}
-                        className="rounded"
-                      />
-                      <label htmlFor={`state-${state}`} className="text-sm">{state}</label>
-                    </div>
-                  ))}
+                <div className="mt-2 max-h-48 overflow-y-auto border rounded-lg p-4">
+                  <div className="grid grid-cols-3 gap-2">
+                    {US_STATES.map((state) => (
+                      <div key={state} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`state-${state}`}
+                          checked={newPharmacy.availableStates.includes(state)}
+                          onCheckedChange={(checked) => handleStateChange(state, !!checked)}
+                        />
+                        <Label htmlFor={`state-${state}`} className="text-sm font-normal">
+                          {state}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div>
-                <Label>Set as Default for States</Label>
-                <p className="text-sm text-gray-500 mb-2">Select which states this should be the default pharmacy for</p>
-                <div className="grid grid-cols-8 gap-2 mt-2 max-h-32 overflow-y-auto border rounded p-2">
-                  {newPharmacy.states.map(state => (
-                    <div key={`default-${state}`} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`default-${state}`}
-                        checked={newPharmacy.defaultForStates.includes(state)}
-                        onChange={(e) => handleStateToggle(state, e.target.checked, true)}
-                        className="rounded"
-                      />
-                      <label htmlFor={`default-${state}`} className="text-sm">{state}</label>
+
+              {newPharmacy.availableStates.length > 0 && (
+                <div>
+                  <Label>Set as Default for States</Label>
+                  <div className="mt-2 border rounded-lg p-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      {newPharmacy.availableStates.map((state) => (
+                        <div key={state} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`default-${state}`}
+                            checked={newPharmacy.defaultForStates.includes(state)}
+                            onCheckedChange={(checked) => handleDefaultStateChange(state, !!checked)}
+                          />
+                          <Label htmlFor={`default-${state}`} className="text-sm font-normal">
+                            {state}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
+              )}
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="status"
+                  checked={newPharmacy.status === 'Active'}
+                  onCheckedChange={(checked) => 
+                    setNewPharmacy({...newPharmacy, status: checked ? 'Active' : 'Inactive'})
+                  }
+                />
+                <Label htmlFor="status">Active Status</Label>
               </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
+
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setIsAddModalOpen(false);
+                  setEditingPharmacy(null);
+                  resetForm();
+                }}>
                   Cancel
                 </Button>
-                <Button onClick={handleAddPharmacy}>
-                  Add Pharmacy
+                <Button onClick={editingPharmacy ? handleSaveEdit : handleAddPharmacy}>
+                  {editingPharmacy ? 'Save Changes' : 'Add Pharmacy'}
                 </Button>
               </div>
             </div>
@@ -346,209 +352,142 @@ export const ManagePharmacy: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <CardTitle>All Pharmacies</CardTitle>
-            <div className="flex space-x-2">
+            <div className="flex items-center space-x-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
+                  type="text"
                   placeholder="Search pharmacies..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 w-64"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-md"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-32">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={stateFilter} onValueChange={setStateFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by State" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All States</SelectItem>
+                  {availableStates.map(state => (
+                    <SelectItem key={state} value={state}>{state}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Pharmacy Name</TableHead>
-                <TableHead>NPI</TableHead>
-                <TableHead>Contact Info</TableHead>
-                <TableHead>Available States</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Updated</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPharmacies.map((pharmacy) => (
-                <TableRow key={pharmacy.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center">
-                      <Building2 className="w-4 h-4 mr-2 text-gray-500" />
-                      {pharmacy.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>{pharmacy.npi}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="text-sm">{pharmacy.email}</div>
-                      <div className="text-sm text-gray-500">{pharmacy.phone}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {pharmacy.states.map(state => (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Pharmacy</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">NPI</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Contact</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Available States</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPharmacies.map((pharmacy) => (
+                  <tr key={pharmacy.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <div>
+                        <p className="font-medium text-gray-900">{pharmacy.name}</p>
+                        <div className="flex items-center text-sm text-gray-500 mt-1">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          {pharmacy.address}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="font-mono text-sm">{pharmacy.npi}</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center text-sm">
+                          <Mail className="w-3 h-3 mr-1 text-gray-400" />
+                          {pharmacy.email}
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <Phone className="w-3 h-3 mr-1 text-gray-400" />
+                          {pharmacy.phone}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-wrap gap-1">
+                        {pharmacy.availableStates.slice(0, 2).map((state) => (
+                          <Badge 
+                            key={state} 
+                            variant="outline" 
+                            className={`text-xs ${pharmacy.defaultForStates.includes(state) ? 'bg-blue-100 text-blue-800 border-blue-300' : ''}`}
+                          >
+                            {state}
+                            {pharmacy.defaultForStates.includes(state) && ' (Default)'}
+                          </Badge>
+                        ))}
+                        {pharmacy.availableStates.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{pharmacy.availableStates.length - 2} more
+                          </Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center space-x-2">
                         <Badge 
-                          key={state} 
-                          variant={pharmacy.defaultForStates.includes(state) ? "default" : "outline"} 
-                          className="text-xs"
+                          variant={pharmacy.status === 'Active' ? 'default' : 'secondary'}
+                          className={pharmacy.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
                         >
-                          {state}
-                          {pharmacy.defaultForStates.includes(state) && " (Default)"}
+                          {pharmacy.status}
                         </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant={pharmacy.status === 'Active' ? 'default' : 'secondary'}>
-                        {pharmacy.status}
-                      </Badge>
-                      <Switch
-                        checked={pharmacy.status === 'Active'}
-                        onCheckedChange={() => togglePharmacyStatus(pharmacy.id)}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-500">
-                    {pharmacy.lastUpdated}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditPharmacy(pharmacy)}
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                        <Switch
+                          checked={pharmacy.status === 'Active'}
+                          onCheckedChange={() => togglePharmacyStatus(pharmacy.id)}
+                        />
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditPharmacy(pharmacy)}
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        Edit
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {filteredPharmacies.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No pharmacies found matching your search criteria.
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      {editingPharmacy && (
-        <Dialog open={!!editingPharmacy} onOpenChange={() => setEditingPharmacy(null)}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Pharmacy</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-name">Pharmacy Name</Label>
-                  <Input
-                    id="edit-name"
-                    value={editingPharmacy.name}
-                    onChange={(e) => setEditingPharmacy({...editingPharmacy, name: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-npi">NPI Number</Label>
-                  <Input
-                    id="edit-npi"
-                    value={editingPharmacy.npi}
-                    onChange={(e) => setEditingPharmacy({...editingPharmacy, npi: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-email">Contact Email</Label>
-                  <Input
-                    id="edit-email"
-                    value={editingPharmacy.email}
-                    onChange={(e) => setEditingPharmacy({...editingPharmacy, email: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-phone">Phone Number</Label>
-                  <Input
-                    id="edit-phone"
-                    value={editingPharmacy.phone}
-                    onChange={(e) => setEditingPharmacy({...editingPharmacy, phone: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="edit-address">Address</Label>
-                <Textarea
-                  id="edit-address"
-                  value={editingPharmacy.address}
-                  onChange={(e) => setEditingPharmacy({...editingPharmacy, address: e.target.value})}
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={editingPharmacy.status === 'Active'}
-                  onCheckedChange={(checked) => setEditingPharmacy({...editingPharmacy, status: checked ? 'Active' : 'Inactive'})}
-                />
-                <Label>Active Status</Label>
-              </div>
-              <div>
-                <Label>Available States</Label>
-                <div className="grid grid-cols-8 gap-2 mt-2 max-h-32 overflow-y-auto border rounded p-2">
-                  {US_STATES.map(state => (
-                    <div key={state} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`edit-state-${state}`}
-                        checked={editingPharmacy.states.includes(state)}
-                        onChange={(e) => handleEditStateToggle(state, e.target.checked)}
-                        className="rounded"
-                      />
-                      <label htmlFor={`edit-state-${state}`} className="text-sm">{state}</label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <Label>Set as Default for States</Label>
-                <p className="text-sm text-gray-500 mb-2">Select which states this should be the default pharmacy for</p>
-                <div className="grid grid-cols-8 gap-2 mt-2 max-h-32 overflow-y-auto border rounded p-2">
-                  {editingPharmacy.states.map(state => (
-                    <div key={`edit-default-${state}`} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`edit-default-${state}`}
-                        checked={editingPharmacy.defaultForStates.includes(state)}
-                        onChange={(e) => handleEditStateToggle(state, e.target.checked, true)}
-                        className="rounded"
-                      />
-                      <label htmlFor={`edit-default-${state}`} className="text-sm">{state}</label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setEditingPharmacy(null)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveEdit}>
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };
