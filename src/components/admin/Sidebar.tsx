@@ -38,6 +38,7 @@ const menuItems = [
   { id: 'support', label: 'Support & Broadcasts', icon: MessageSquare },
   { id: 'compliance', label: 'Compliance Center', icon: ShieldCheck },
   { id: 'admin-team', label: 'Admin Team', icon: UserCog },
+  { id: 'affiliates', label: 'Affiliates', icon: Users },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {

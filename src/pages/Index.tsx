@@ -15,11 +15,14 @@ import { ComplianceCenter } from '@/components/admin/ComplianceCenter';
 import { AdminTeam } from '@/components/admin/AdminTeam';
 import { ManagePharmacy } from '@/components/admin/ManagePharmacy';
 import { ManageProducts } from '@/components/admin/ManageProducts';
+import { Affiliates } from '@/components/admin/Affiliates';
+import { AffiliateDetails } from '@/components/admin/AffiliateDetails';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedMerchantId, setSelectedMerchantId] = useState<number | null>(null);
+  const [selectedAffiliateId, setSelectedAffiliateId] = useState<number | null>(null);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -55,6 +58,16 @@ const Index = () => {
         return <ManagePharmacy />;
       case 'products':
         return <ManageProducts />;
+      case 'affiliates':
+        return <Affiliates onViewDetails={(affiliateId) => {
+          setSelectedAffiliateId(affiliateId);
+          setActiveTab('affiliate-details');
+        }} />;
+      case 'affiliate-details':
+        return <AffiliateDetails 
+          affiliateId={selectedAffiliateId} 
+          onBack={() => setActiveTab('affiliates')} 
+        />;
       default:
         return <Dashboard />;
     }
