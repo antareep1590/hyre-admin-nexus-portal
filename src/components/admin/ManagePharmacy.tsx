@@ -180,19 +180,6 @@ export const ManagePharmacy: React.FC = () => {
     }
   };
 
-  const handleDefaultStateChange = (state: string, checked: boolean) => {
-    if (checked) {
-      setNewPharmacy(prev => ({
-        ...prev,
-        defaultForStates: [...prev.defaultForStates, state]
-      }));
-    } else {
-      setNewPharmacy(prev => ({
-        ...prev,
-        defaultForStates: prev.defaultForStates.filter(s => s !== state)
-      }));
-    }
-  };
 
   const togglePharmacyStatus = (id: number) => {
     setPharmacies(pharmacies.map(pharmacy =>
@@ -300,27 +287,6 @@ export const ManagePharmacy: React.FC = () => {
                 </div>
               </div>
 
-              {newPharmacy.availableStates.length > 0 && (
-                <div>
-                  <Label>Set as Default for States</Label>
-                  <div className="mt-2 border rounded-lg p-4">
-                    <div className="grid grid-cols-2 gap-2">
-                      {newPharmacy.availableStates.map((state) => (
-                        <div key={state} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`default-${state}`}
-                            checked={newPharmacy.defaultForStates.includes(state)}
-                            onCheckedChange={(checked) => handleDefaultStateChange(state, !!checked)}
-                          />
-                          <Label htmlFor={`default-${state}`} className="text-sm font-normal">
-                            {state}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <div className="flex items-center space-x-2">
                 <Switch

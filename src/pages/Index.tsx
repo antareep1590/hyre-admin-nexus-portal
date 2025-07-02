@@ -15,6 +15,7 @@ import { ComplianceCenter } from '@/components/admin/ComplianceCenter';
 import { AdminTeam } from '@/components/admin/AdminTeam';
 import { ManagePharmacy } from '@/components/admin/ManagePharmacy';
 import { ManageProducts } from '@/components/admin/ManageProducts';
+import { Categories } from '@/components/admin/Categories';
 import { Affiliates } from '@/components/admin/Affiliates';
 import { AffiliateDetails } from '@/components/admin/AffiliateDetails';
 
@@ -46,6 +47,8 @@ const Index = () => {
         return <DomainBranding />;
       case 'templates':
         return <TemplateLibrary />;
+      case 'categories':
+        return <Categories />;
       case 'activity':
         return <ActivityLogs />;
       case 'support':

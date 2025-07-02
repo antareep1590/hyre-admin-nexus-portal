@@ -22,6 +22,7 @@ export const DomainBranding: React.FC = () => {
       merchant: 'Revive Clinic',
       subdomain: 'revive.hyrehealth.com',
       customDomain: 'book.reviveclinic.com',
+      domainOption: 'Custom Domain',
       dnsStatus: 'verified',
       sslStatus: 'active',
       lastChecked: '2 minutes ago',
@@ -31,6 +32,7 @@ export const DomainBranding: React.FC = () => {
       merchant: 'FitLife Gym',
       subdomain: 'fitlife.hyrehealth.com',
       customDomain: null,
+      domainOption: 'HyrHealth Subdomain',
       dnsStatus: 'verified',
       sslStatus: 'active',
       lastChecked: '5 minutes ago',
@@ -40,6 +42,7 @@ export const DomainBranding: React.FC = () => {
       merchant: 'WellSpace Therapy',
       subdomain: 'wellspace.hyrehealth.com',
       customDomain: 'therapy.wellspace.com',
+      domainOption: 'Custom Domain',
       dnsStatus: 'pending',
       sslStatus: 'pending',
       lastChecked: '1 hour ago',
@@ -49,6 +52,7 @@ export const DomainBranding: React.FC = () => {
       merchant: 'Peak Performance',
       subdomain: 'peak.hyrehealth.com',
       customDomain: 'booking.peakperformance.com',
+      domainOption: 'Purchased via HyrHealth',
       dnsStatus: 'failed',
       sslStatus: 'failed',
       lastChecked: '3 hours ago',
@@ -157,9 +161,10 @@ export const DomainBranding: React.FC = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Merchant</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Subdomain</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Merchant Name</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Subdomain Used</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Custom Domain</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Domain Option Selected</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">DNS Status</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">SSL Status</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Last Checked</th>
@@ -187,6 +192,18 @@ export const DomainBranding: React.FC = () => {
                       ) : (
                         <span className="text-gray-400 text-sm">Not configured</span>
                       )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge 
+                        variant="outline" 
+                        className={
+                          domain.domainOption === 'HyrHealth Subdomain' ? 'bg-blue-100 text-blue-800' :
+                          domain.domainOption === 'Custom Domain' ? 'bg-purple-100 text-purple-800' :
+                          'bg-green-100 text-green-800'
+                        }
+                      >
+                        {domain.domainOption}
+                      </Badge>
                     </td>
                     <td className="py-3 px-4">
                       <Badge variant="outline" className={getStatusColor(domain.dnsStatus)}>

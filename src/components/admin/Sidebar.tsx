@@ -32,6 +32,7 @@ const menuItems = [
   { id: 'payouts', label: 'Payouts', icon: DollarSign },
   { id: 'domains', label: 'Domain & Branding', icon: Globe },
   { id: 'templates', label: 'Template Library', icon: FileText },
+  { id: 'categories', label: 'Categories', icon: Package },
   { id: 'pharmacy', label: 'Pharmacy', icon: Building2 },
   { id: 'products', label: 'Products', icon: Package },
   { id: 'activity', label: 'Activity Logs', icon: Activity },
