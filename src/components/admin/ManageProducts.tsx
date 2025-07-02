@@ -23,7 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Search, Edit, Package, Eye, Upload, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ProductDetails } from './ProductDetails';
+import { ProductDetailsPage } from './ProductDetailsPage';
 import { ProductForm } from './ProductForm';
 
 interface DosageOption {
@@ -395,7 +395,7 @@ export const ManageProducts: React.FC = () => {
 
   if (activeTab === 'details' && viewingProduct) {
     return (
-      <ProductDetails
+      <ProductDetailsPage
         product={viewingProduct}
         onBack={handleBackToList}
         onEdit={handleEditProduct}

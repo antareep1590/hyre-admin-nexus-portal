@@ -123,9 +123,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     general: true,
     content: false,
     pricing: false,
-    media: false,
-    advanced: false
+    media: false
   });
+
+  const [videoUploadType, setVideoUploadType] = useState<'url' | 'upload'>('url');
 
   const updateField = (field: keyof ProductData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -527,15 +528,62 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   )}
                 </div>
 
-                {/* Product Video */}
-                <div className="space-y-2">
-                  <Label htmlFor="video">Product Video URL (Optional)</Label>
-                  <Input
-                    id="video"
-                    value={formData.videoUrl}
-                    onChange={(e) => updateField('videoUrl', e.target.value)}
-                    placeholder="YouTube or Vimeo URL"
-                  />
+                <div className="space-y-3">
+                  <Label>Product Video (Optional)</Label>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={videoUploadType === 'url' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setVideoUploadType('url')}
+                      >
+                        Video URL
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={videoUploadType === 'upload' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setVideoUploadType('upload')}
+                      >
+                        Upload Video
+                      </Button>
+                    </div>
+                    {videoUploadType === 'url' ? (
+                      <Input
+                        value={formData.videoUrl}
+                        onChange={(e) => updateField('videoUrl', e.target.value)}
+                        placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                      />
+                    ) : (
+                      <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Click to upload video or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          MP4, WebM or OGV (max 100MB)
+                        </p>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          className="hidden"
+                          id="video-upload"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              updateField('videoUrl', URL.createObjectURL(file));
+                            }
+                          }}
+                        />
+                        <label htmlFor="video-upload">
+                          <Button type="button" variant="outline" className="cursor-pointer">
+                            Select Video
+                          </Button>
+                        </label>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </CollapsibleContent>
@@ -705,78 +753,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </Card>
         </Collapsible>
 
-        {/* Advanced Settings */}
-        <Collapsible open={openSections.advanced} onOpenChange={() => toggleSection('advanced')}>
-          <Card>
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Advanced Settings</CardTitle>
-                  <ChevronDown className={cn("w-5 h-5 transition-transform", openSections.advanced && "rotate-180")} />
-                </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label>Prescription Required</Label>
-                      <Switch
-                        checked={formData.prescriptionRequired}
-                        onCheckedChange={(checked) => updateField('prescriptionRequired', checked)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="fulfillment">Fulfillment Type</Label>
-                      <select
-                        id="fulfillment"
-                        className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
-                        value={formData.fulfillmentType}
-                        onChange={(e) => updateField('fulfillmentType', e.target.value)}
-                      >
-                        {fulfillmentTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <Label>FDA Warning Notice</Label>
-                      <Switch
-                        checked={formData.fdaWarning}
-                        onCheckedChange={(checked) => updateField('fdaWarning', checked)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="age-restriction">Age Restriction</Label>
-                      <Input
-                        id="age-restriction"
-                        type="number"
-                        value={formData.ageRestriction}
-                        onChange={(e) => updateField('ageRestriction', parseInt(e.target.value) || 0)}
-                        placeholder="18"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label>Prescription Info / Notes</Label>
-                    <ReactQuill
-                      theme="snow"
-                      modules={quillModules}
-                      value={formData.prescriptionNotes}
-                      onChange={(value) => updateField('prescriptionNotes', value)}
-                      placeholder="Additional prescription requirements or notes..."
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
       </div>
     </div>
   );

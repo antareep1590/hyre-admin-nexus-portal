@@ -3,8 +3,21 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, Package } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { 
+  ArrowLeft, 
+  Edit, 
+  Package, 
+  Eye, 
+  ShieldCheck, 
+  AlertTriangle,
+  Calendar,
+  Users,
+  ChevronDown,
+  ExternalLink
+} from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface DosageOption {
   id: number;
