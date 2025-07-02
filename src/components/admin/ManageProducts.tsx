@@ -24,6 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Plus, Search, Edit, Package, Eye, Upload, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductDetails } from './ProductDetails';
+import { ProductForm } from './ProductForm';
 
 interface DosageOption {
   id: number;
@@ -134,6 +135,7 @@ export const ManageProducts: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('list');
+  const [showProductForm, setShowProductForm] = useState(false);
 
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -298,20 +300,7 @@ export const ManageProducts: React.FC = () => {
 
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
-    // Pre-fill form with existing values
-    setNewProduct({
-      name: product.name,
-      category: product.category,
-      description: product.description,
-      benefits: product.benefits,
-      sideEffects: product.sideEffects,
-      images: product.images,
-      dosageOptions: product.dosageOptions.map(({ id, ...rest }) => rest),
-      subscriptionPricing: product.subscriptionPricing,
-      relatedProductId: product.relatedProductId,
-      status: product.status
-    });
-    setIsAddModalOpen(true);
+    setShowProductForm(true);
   };
 
   const handleSaveEdit = () => {
@@ -331,6 +320,79 @@ export const ManageProducts: React.FC = () => {
     setIsAddModalOpen(false);
   };
 
+  const handleProductFormSave = (productData: any, isDraft = false) => {
+    if (editingProduct) {
+      // Update existing product
+      const updatedProduct: Product = {
+        ...editingProduct,
+        ...productData,
+        lastUpdated: new Date().toISOString().split('T')[0],
+        // Transform the data to match existing structure
+        benefits: Array.isArray(productData.benefits) ? productData.benefits : [productData.benefits],
+        sideEffects: Array.isArray(productData.sideEffects) ? productData.sideEffects : [productData.sideEffects],
+        images: productData.images.map((img: any) => typeof img === 'string' ? img : img.url),
+        relatedProductId: productData.relatedProductIds?.[0]
+      };
+      setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
+    } else {
+      // Add new product
+      const newProductData: Product = {
+        id: Math.max(...products.map(p => p.id)) + 1,
+        ...productData,
+        benefits: Array.isArray(productData.benefits) ? productData.benefits : [productData.benefits],
+        sideEffects: Array.isArray(productData.sideEffects) ? productData.sideEffects : [productData.sideEffects],
+        images: productData.images.map((img: any) => typeof img === 'string' ? img : img.url),
+        relatedProductId: productData.relatedProductIds?.[0],
+        merchantsUsing: 0,
+        lastUpdated: new Date().toISOString().split('T')[0]
+      };
+      setProducts([...products, newProductData]);
+    }
+    
+    setShowProductForm(false);
+    setEditingProduct(null);
+  };
+
+  const handleProductFormCancel = () => {
+    setShowProductForm(false);
+    setEditingProduct(null);
+  };
+
+  if (showProductForm) {
+    // Transform product data for the form
+    const productForForm = editingProduct ? {
+      ...editingProduct,
+      tags: [],
+      sku: '',
+      benefits: typeof editingProduct.benefits === 'string' ? editingProduct.benefits : editingProduct.benefits.join('\n'),
+      sideEffects: typeof editingProduct.sideEffects === 'string' ? editingProduct.sideEffects : editingProduct.sideEffects.join('\n'),
+      ingredients: '',
+      instructions: '',
+      faqs: [],
+      shippingReturns: '',
+      images: editingProduct.images.map(img => ({ url: img, alt: '' })),
+      videoUrl: '',
+      basePrice: editingProduct.dosageOptions[0]?.pricePerMonth || 0,
+      comparePrice: 0,
+      relatedProductIds: editingProduct.relatedProductId ? [editingProduct.relatedProductId] : [],
+      prescriptionRequired: false,
+      fulfillmentType: 'Pharmacy-Shipped',
+      fdaWarning: false,
+      prescriptionNotes: '',
+      ageRestriction: 0
+    } : undefined;
+
+    return (
+      <ProductForm
+        product={productForForm}
+        categories={categories}
+        allProducts={products}
+        onSave={handleProductFormSave}
+        onCancel={handleProductFormCancel}
+      />
+    );
+  }
+
   if (activeTab === 'details' && viewingProduct) {
     return (
       <ProductDetails
@@ -349,319 +411,13 @@ export const ManageProducts: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
           <p className="text-gray-600 mt-1">Platform-wide product catalog for merchant storefronts</p>
         </div>
-        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
-            </DialogHeader>
-            <Tabs defaultValue="basic" className="w-full">
-              <TabsList>
-                <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                <TabsTrigger value="images">Images</TabsTrigger>
-                <TabsTrigger value="dosage">Dosage & Pricing</TabsTrigger>
-                <TabsTrigger value="details">Benefits & Side Effects</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="basic" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="product-name">Product Name</Label>
-                    <Input
-                      id="product-name"
-                      value={newProduct.name}
-                      onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                      placeholder="Enter product name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <select
-                      id="category"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      value={newProduct.category}
-                      onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
-                    >
-                      <option value="">Select Category</option>
-                      {categories.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="description">Product Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newProduct.description}
-                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                    placeholder="Enter detailed product description"
-                    rows={6}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="related-product">Related Product (Optional)</Label>
-                  <select
-                    id="related-product"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    value={newProduct.relatedProductId || ''}
-                    onChange={(e) => setNewProduct({...newProduct, relatedProductId: e.target.value ? parseInt(e.target.value) : undefined})}
-                  >
-                    <option value="">No related product</option>
-                    {products.filter(p => editingProduct ? p.id !== editingProduct.id : true).map(product => (
-                      <option key={product.id} value={product.id}>{product.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={newProduct.status === 'Active'}
-                    onCheckedChange={(checked) => setNewProduct({...newProduct, status: checked ? 'Active' : 'Inactive'})}
-                  />
-                  <Label>Active Status</Label>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="images" className="space-y-4">
-                <div>
-                  <Label>Product Images</Label>
-                  <div className="mt-2">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500 mb-2">Upload product images</p>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e.target.files)}
-                        className="hidden"
-                        id="image-upload"
-                      />
-                      <label htmlFor="image-upload">
-                        <Button type="button" variant="outline" className="cursor-pointer">
-                          Select Images
-                        </Button>
-                      </label>
-                    </div>
-                    {newProduct.images.length > 0 && (
-                      <div className="grid grid-cols-4 gap-2 mt-4">
-                        {newProduct.images.map((image, index) => (
-                          <div key={index} className="relative">
-                            <img
-                              src={image}
-                              alt={`Product ${index + 1}`}
-                              className="w-full aspect-square object-cover rounded-lg border"
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              className="absolute top-1 right-1 w-6 h-6 p-0"
-                              onClick={() => removeImage(index)}
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="dosage" className="space-y-4">
-                <div>
-                  <Label>Dosage Options</Label>
-                  {newProduct.dosageOptions.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2 mt-2">
-                      <Input
-                        placeholder="Dosage (e.g., 0.25mg)"
-                        value={option.label}
-                        onChange={(e) => updateDosageOption(index, 'label', e.target.value)}
-                        className="flex-1"
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Price per month"
-                        value={option.pricePerMonth}
-                        onChange={(e) => updateDosageOption(index, 'pricePerMonth', parseFloat(e.target.value))}
-                        className="w-32"
-                      />
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          name="defaultDosage"
-                          checked={option.isDefault}
-                          onChange={() => {
-                            const updatedOptions = newProduct.dosageOptions.map((opt, i) => ({
-                              ...opt,
-                              isDefault: i === index
-                            }));
-                            setNewProduct({...newProduct, dosageOptions: updatedOptions});
-                          }}
-                        />
-                        <Label className="text-sm">Default</Label>
-                      </div>
-                      {newProduct.dosageOptions.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeDosageOption(index)}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addDosageOption}
-                    className="mt-2"
-                  >
-                    Add Dosage Option
-                  </Button>
-                </div>
-                
-                <div>
-                  <Label>Subscription Pricing</Label>
-                  <div className="grid grid-cols-3 gap-4 mt-2">
-                    <div>
-                      <Label htmlFor="one-month">1 Month</Label>
-                      <Input
-                        id="one-month"
-                        type="number"
-                        value={newProduct.subscriptionPricing.oneMonth}
-                        onChange={(e) => setNewProduct({
-                          ...newProduct,
-                          subscriptionPricing: {
-                            ...newProduct.subscriptionPricing,
-                            oneMonth: parseFloat(e.target.value)
-                          }
-                        })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="two-month">2 Month</Label>
-                      <Input
-                        id="two-month"
-                        type="number"
-                        value={newProduct.subscriptionPricing.twoMonth}
-                        onChange={(e) => setNewProduct({
-                          ...newProduct,
-                          subscriptionPricing: {
-                            ...newProduct.subscriptionPricing,
-                            twoMonth: parseFloat(e.target.value)
-                          }
-                        })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="three-month">3 Month</Label>
-                      <Input
-                        id="three-month"
-                        type="number"
-                        value={newProduct.subscriptionPricing.threeMonth}
-                        onChange={(e) => setNewProduct({
-                          ...newProduct,
-                          subscriptionPricing: {
-                            ...newProduct.subscriptionPricing,
-                            threeMonth: parseFloat(e.target.value)
-                          }
-                        })}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="details" className="space-y-4">
-                <div>
-                  <Label>Benefits</Label>
-                  {newProduct.benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-center space-x-2 mt-2">
-                      <Input
-                        placeholder="Enter benefit"
-                        value={benefit}
-                        onChange={(e) => updateBenefit(index, e.target.value)}
-                        className="flex-1"
-                      />
-                      {newProduct.benefits.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeBenefit(index)}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addBenefit}
-                    className="mt-2"
-                  >
-                    Add Benefit
-                  </Button>
-                </div>
-
-                <div>
-                  <Label>Side Effects</Label>
-                  {newProduct.sideEffects.map((sideEffect, index) => (
-                    <div key={index} className="flex items-center space-x-2 mt-2">
-                      <Input
-                        placeholder="Enter side effect"
-                        value={sideEffect}
-                        onChange={(e) => updateSideEffect(index, e.target.value)}
-                        className="flex-1"
-                      />
-                      {newProduct.sideEffects.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeSideEffect(index)}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addSideEffect}
-                    className="mt-2"
-                  >
-                    Add Side Effect
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
-            
-            <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button variant="outline" onClick={() => {
-                setIsAddModalOpen(false);
-                setEditingProduct(null);
-                resetNewProduct();
-              }}>
-                Cancel
-              </Button>
-              <Button onClick={editingProduct ? handleSaveEdit : handleAddProduct}>
-                {editingProduct ? 'Save Changes' : 'Add Product'}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() => setShowProductForm(true)}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Product
+        </Button>
       </div>
 
       <Card>
