@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, Search, Filter, Upload, Image } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, Upload, Image, Star } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ interface Category {
   status: 'Active' | 'Inactive';
   imageUrl?: string;
   dateCreated: string;
+  isPopular?: boolean;
 }
 
 export const Categories: React.FC = () => {
@@ -76,6 +77,7 @@ export const Categories: React.FC = () => {
     description: '',
     status: 'Active' as 'Active' | 'Inactive',
     imageUrl: '',
+    isPopular: false,
   });
 
   const filteredCategories = categories.filter(category => {
@@ -103,6 +105,7 @@ export const Categories: React.FC = () => {
       description: category.description,
       status: category.status,
       imageUrl: category.imageUrl || '',
+      isPopular: category.isPopular || false,
     });
     setIsAddModalOpen(true);
   };
@@ -129,6 +132,7 @@ export const Categories: React.FC = () => {
       description: '',
       status: 'Active',
       imageUrl: '',
+      isPopular: false,
     });
   };
 
@@ -233,6 +237,17 @@ export const Categories: React.FC = () => {
                 <Label htmlFor="status">Active Status</Label>
               </div>
 
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="popular"
+                  checked={newCategory.isPopular}
+                  onCheckedChange={(checked) => 
+                    setNewCategory({...newCategory, isPopular: checked})
+                  }
+                />
+                <Label htmlFor="popular">Mark as Popular Category</Label>
+              </div>
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={() => {
                   setIsAddModalOpen(false);
@@ -296,9 +311,17 @@ export const Categories: React.FC = () => {
               <tbody>
                 {filteredCategories.map((category) => (
                   <tr key={category.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <span className="font-medium text-gray-900">{category.name}</span>
-                    </td>
+                     <td className="py-3 px-4">
+                       <div className="flex items-center space-x-2">
+                         <span className="font-medium text-gray-900">{category.name}</span>
+                         {category.isPopular && (
+                           <div className="flex items-center space-x-1">
+                             <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                             <span className="text-xs font-medium text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">Popular</span>
+                           </div>
+                         )}
+                       </div>
+                     </td>
                     <td className="py-3 px-4">
                       <span className="text-gray-600">{category.description}</span>
                     </td>
