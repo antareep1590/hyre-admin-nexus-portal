@@ -55,6 +55,19 @@ const questionTypes = [
   { value: 'date', label: 'Date' },
 ];
 
+const questionCategories = [
+  { value: 'general', label: 'General Question' },
+  { value: 'product-specific', label: 'Product Specific' },
+];
+
+// Mock products data - in real app this would come from props or API
+const mockProducts = [
+  { id: 1, name: 'Semaglutide' },
+  { id: 2, name: 'Tirzepatide' },
+  { id: 3, name: 'NAD+ Therapy' },
+  { id: 4, name: 'Testosterone Therapy' },
+];
+
 export const QuestionBuilder: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([
     {
@@ -93,12 +106,12 @@ export const QuestionBuilder: React.FC = () => {
     businessTypes: [] as string[],
     productIds: [] as number[],
     category: 'general' as 'general' | 'product-specific',
+    selectedProductId: undefined as number | undefined,
   });
 
   const filteredQuestions = questions.filter(question => {
     const matchesSearch = question.text.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = question.category === activeTab;
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 
   const handleAddQuestion = () => {
@@ -108,6 +121,9 @@ export const QuestionBuilder: React.FC = () => {
       options: newQuestion.type === 'multiple-choice' || newQuestion.type === 'dropdown' 
         ? newQuestion.options.filter(opt => opt.trim() !== '') 
         : undefined,
+      productIds: newQuestion.category === 'product-specific' && newQuestion.selectedProductId 
+        ? [newQuestion.selectedProductId] 
+        : [],
     };
     setQuestions([...questions, question]);
     resetForm();
@@ -125,6 +141,7 @@ export const QuestionBuilder: React.FC = () => {
       businessTypes: question.businessTypes,
       productIds: question.productIds || [],
       category: question.category,
+      selectedProductId: question.productIds?.[0],
     });
     setIsAddModalOpen(true);
   };
@@ -137,6 +154,9 @@ export const QuestionBuilder: React.FC = () => {
       options: newQuestion.type === 'multiple-choice' || newQuestion.type === 'dropdown' 
         ? newQuestion.options.filter(opt => opt.trim() !== '') 
         : undefined,
+      productIds: newQuestion.category === 'product-specific' && newQuestion.selectedProductId 
+        ? [newQuestion.selectedProductId] 
+        : [],
     };
     setQuestions(questions.map(q => q.id === editingQuestion.id ? updatedQuestion : q));
     setEditingQuestion(null);
@@ -157,7 +177,8 @@ export const QuestionBuilder: React.FC = () => {
       correctAnswer: '',
       businessTypes: [],
       productIds: [],
-      category: activeTab as 'general' | 'product-specific',
+      category: 'general',
+      selectedProductId: undefined,
     });
   };
 
@@ -209,16 +230,13 @@ export const QuestionBuilder: React.FC = () => {
             <Eye className="w-4 h-4 mr-2" />
             {previewMode ? 'Edit Mode' : 'Preview'}
           </Button>
-          <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => setNewQuestion(prev => ({ ...prev, category: activeTab as 'general' | 'product-specific' }))}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Question
-              </Button>
-            </DialogTrigger>
+            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Question
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
@@ -238,24 +256,71 @@ export const QuestionBuilder: React.FC = () => {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="question-type">Question Type</Label>
-                  <Select 
-                    value={newQuestion.type} 
-                    onValueChange={(value: Question['type']) => setNewQuestion({...newQuestion, type: value})}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select question type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {questionTypes.map(type => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="question-category">Question Category</Label>
+                    <Select 
+                      value={newQuestion.category} 
+                      onValueChange={(value: 'general' | 'product-specific') => 
+                        setNewQuestion({...newQuestion, category: value, selectedProductId: undefined})
+                      }
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {questionCategories.map(category => (
+                          <SelectItem key={category.value} value={category.value}>
+                            {category.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="question-type">Question Type</Label>
+                    <Select 
+                      value={newQuestion.type} 
+                      onValueChange={(value: Question['type']) => setNewQuestion({...newQuestion, type: value})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select question type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {questionTypes.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
+                {newQuestion.category === 'product-specific' && (
+                  <div>
+                    <Label htmlFor="product-selection">Select Product</Label>
+                    <Select 
+                      value={newQuestion.selectedProductId?.toString()} 
+                      onValueChange={(value) => setNewQuestion({...newQuestion, selectedProductId: parseInt(value)})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select a product" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockProducts.map(product => (
+                          <SelectItem key={product.id} value={product.id.toString()}>
+                            {product.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-gray-600 mt-1">
+                      This question will only appear when consumers are purchasing the selected product.
+                    </p>
+                  </div>
+                )}
 
                 {(newQuestion.type === 'multiple-choice' || newQuestion.type === 'dropdown') && (
                   <div>
@@ -377,77 +442,85 @@ export const QuestionBuilder: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="general">General Questions</TabsTrigger>
-                <TabsTrigger value="product-specific">Product-Specific</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value={activeTab} className="mt-4">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Question</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Type</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Required</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Business Types</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredQuestions.map((question) => (
-                        <tr key={question.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-3 px-4">
-                            <span className="font-medium text-gray-900">{question.text}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <Badge variant="outline">
-                              {questionTypes.find(t => t.value === question.type)?.label}
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-4">
-                            <Badge variant={question.required ? 'default' : 'secondary'}>
-                              {question.required ? 'Required' : 'Optional'}
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex flex-wrap gap-1">
-                              {question.businessTypes.map(type => (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Question</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Category</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Type</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Required</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Product/Business Types</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {filteredQuestions.map((question) => (
+                      <tr key={question.id} className="border-b border-gray-100 hover:bg-gray-50">
+                         <td className="py-3 px-4">
+                           <span className="font-medium text-gray-900">{question.text}</span>
+                         </td>
+                        <td className="py-3 px-4">
+                          <Badge variant={question.category === 'general' ? 'default' : 'secondary'}>
+                            {questionCategories.find(c => c.value === question.category)?.label}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline">
+                            {questionTypes.find(t => t.value === question.type)?.label}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant={question.required ? 'default' : 'secondary'}>
+                            {question.required ? 'Required' : 'Optional'}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-wrap gap-1">
+                            {question.category === 'product-specific' && question.productIds && question.productIds.length > 0 ? (
+                              question.productIds.map(productId => {
+                                const product = mockProducts.find(p => p.id === productId);
+                                return product ? (
+                                  <Badge key={productId} variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                                    {product.name}
+                                  </Badge>
+                                ) : null;
+                              })
+                            ) : (
+                              question.businessTypes.map(type => (
                                 <Badge key={type} variant="outline" className="text-xs">
                                   {type}
                                 </Badge>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditQuestion(question)}
-                              >
-                                <Edit className="w-3 h-3 mr-1" />
-                                Edit
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-red-600 hover:text-red-700"
-                                onClick={() => handleDeleteQuestion(question.id)}
-                              >
-                                <Trash2 className="w-3 h-3 mr-1" />
-                                Delete
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </TabsContent>
-            </Tabs>
+                              ))
+                            )}
+                          </div>
+                        </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditQuestion(question)}
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDeleteQuestion(question.id)}
+                          >
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -459,10 +532,22 @@ export const QuestionBuilder: React.FC = () => {
             <div className="space-y-6">
               {filteredQuestions.map((question, index) => (
                 <div key={question.id} className="space-y-2">
-                  <Label className="text-base font-medium">
-                    {index + 1}. {question.text}
-                    {question.required && <span className="text-red-500 ml-1">*</span>}
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-medium">
+                      {index + 1}. {question.text}
+                      {question.required && <span className="text-red-500 ml-1">*</span>}
+                    </Label>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={question.category === 'general' ? 'default' : 'secondary'} className="text-xs">
+                        {questionCategories.find(c => c.value === question.category)?.label}
+                      </Badge>
+                      {question.category === 'product-specific' && question.productIds && question.productIds.length > 0 && (
+                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                          {mockProducts.find(p => p.id === question.productIds![0])?.name}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
                   
                   {question.type === 'text' && (
                     <Input placeholder="Enter your answer..." />
