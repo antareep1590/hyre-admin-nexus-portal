@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   ChevronDown, 
   Plus, 
@@ -73,6 +74,7 @@ interface ProductFormProps {
 }
 
 const categories = ["Weight Loss", "Anti-Aging", "Peptides", "Fitness", "Wellness"];
+const businessTypes = ["Clinics", "Gyms", "Wellness Centers", "Telehealth", "Pharmacy"];
 const fulfillmentTypes = ["Pharmacy-Shipped", "In-Clinic", "Telemedicine", "Other"];
 
 const quillModules = {
@@ -95,6 +97,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [formData, setFormData] = useState<ProductData>({
     name: product?.name || '',
     category: product?.category || '',
+    businessTypes: product?.businessTypes || [],
     tags: product?.tags || [],
     sku: product?.sku || '',
     status: product?.status || 'Active',
@@ -279,6 +282,36 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       ))}
                     </select>
                   </div>
+                </div>
+
+                {/* Business Types */}
+                <div className="space-y-3">
+                  <Label>Business Types</Label>
+                  <p className="text-sm text-muted-foreground">Select which business types this product is relevant for</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {businessTypes.map(type => (
+                      <div key={type} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`business-type-${type}`}
+                          checked={formData.businessTypes?.includes(type) || false}
+                          onCheckedChange={(checked) => {
+                            const currentTypes = formData.businessTypes || [];
+                            if (checked) {
+                              updateField('businessTypes', [...currentTypes, type]);
+                            } else {
+                              updateField('businessTypes', currentTypes.filter(t => t !== type));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`business-type-${type}`} className="text-sm font-normal">
+                          {type}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="sku">SKU (Optional)</Label>
                     <Input

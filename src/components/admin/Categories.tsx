@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Edit, Trash2, Search, Filter, Upload, Image, Star } from 'lucide-react';
 import {
   Dialog,
@@ -21,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
+const businessTypes = ["Clinics", "Gyms", "Wellness Centers", "Telehealth", "Pharmacy"];
 
 interface Category {
   id: number;
@@ -77,6 +80,7 @@ export const Categories: React.FC = () => {
     name: '',
     description: '',
     status: 'Active' as 'Active' | 'Inactive',
+    businessTypes: [] as string[],
     imageUrl: '',
     isPopular: false,
   });
@@ -105,6 +109,7 @@ export const Categories: React.FC = () => {
       name: category.name,
       description: category.description,
       status: category.status,
+      businessTypes: category.businessTypes || [],
       imageUrl: category.imageUrl || '',
       isPopular: category.isPopular || false,
     });
@@ -132,6 +137,7 @@ export const Categories: React.FC = () => {
       name: '',
       description: '',
       status: 'Active',
+      businessTypes: [],
       imageUrl: '',
       isPopular: false,
     });
@@ -187,6 +193,37 @@ export const Categories: React.FC = () => {
                   className="mt-1"
                   rows={3}
                 />
+              </div>
+
+              <div>
+                <Label>Business Types</Label>
+                <p className="text-sm text-gray-600 mb-2">Select which business types can use this category</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {businessTypes.map(type => (
+                    <div key={type} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-business-${type}`}
+                        checked={newCategory.businessTypes.includes(type)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setNewCategory({
+                              ...newCategory,
+                              businessTypes: [...newCategory.businessTypes, type]
+                            });
+                          } else {
+                            setNewCategory({
+                              ...newCategory,
+                              businessTypes: newCategory.businessTypes.filter(t => t !== type)
+                            });
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`category-business-${type}`} className="text-sm">
+                        {type}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div>

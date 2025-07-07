@@ -16,6 +16,9 @@ import { AdminTeam } from '@/components/admin/AdminTeam';
 import { ManagePharmacy } from '@/components/admin/ManagePharmacy';
 import { ManageProducts } from '@/components/admin/ManageProducts';
 import { Categories } from '@/components/admin/Categories';
+import { QuestionBuilder } from '@/components/admin/QuestionBuilder';
+import { IntakeFormBuilder } from '@/components/admin/IntakeFormBuilder';
+import { ConsumerDirectory } from '@/components/admin/ConsumerDirectory';
 import { Affiliates } from '@/components/admin/Affiliates';
 import { AffiliateDetails } from '@/components/admin/AffiliateDetails';
 
@@ -61,6 +64,12 @@ const Index = () => {
         return <ManagePharmacy />;
       case 'products':
         return <ManageProducts />;
+      case 'question-builder':
+        return <QuestionBuilder />;
+      case 'intake-forms':
+        return <IntakeFormBuilder />;
+      case 'consumers':
+        return <ConsumerDirectory />;
       case 'affiliates':
         return <Affiliates onViewDetails={(affiliateId) => {
           setSelectedAffiliateId(affiliateId);
