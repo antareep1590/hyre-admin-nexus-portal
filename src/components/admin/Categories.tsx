@@ -27,6 +27,7 @@ interface Category {
   name: string;
   description: string;
   status: 'Active' | 'Inactive';
+  businessTypes?: string[];
   imageUrl?: string;
   dateCreated: string;
   isPopular?: boolean;

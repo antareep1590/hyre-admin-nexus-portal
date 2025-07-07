@@ -39,6 +39,7 @@ interface ProductData {
   id?: number;
   name: string;
   category: string;
+  businessTypes?: string[];
   tags: string[];
   sku: string;
   status: 'Active' | 'Inactive';
