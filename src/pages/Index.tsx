@@ -21,6 +21,8 @@ import { IntakeFormBuilder } from '@/components/admin/IntakeFormBuilder';
 import { ConsumerDirectory } from '@/components/admin/ConsumerDirectory';
 import { Affiliates } from '@/components/admin/Affiliates';
 import { AffiliateDetails } from '@/components/admin/AffiliateDetails';
+import { Profile } from '@/components/admin/Profile';
+import { Notifications } from '@/components/admin/Notifications';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -80,6 +82,10 @@ const Index = () => {
           affiliateId={selectedAffiliateId} 
           onBack={() => setActiveTab('affiliates')} 
         />;
+      case 'profile':
+        return <Profile onBack={() => setActiveTab('dashboard')} />;
+      case 'notifications':
+        return <Notifications onBack={() => setActiveTab('dashboard')} />;
       default:
         return <Dashboard />;
     }
@@ -94,7 +100,7 @@ const Index = () => {
         setCollapsed={setSidebarCollapsed}
       />
       <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-        <TopNavigation />
+        <TopNavigation onNavigate={setActiveTab} />
         <main className="flex-1 p-6">
           {renderContent()}
         </main>

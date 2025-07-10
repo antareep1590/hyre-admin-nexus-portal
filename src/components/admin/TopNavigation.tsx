@@ -11,7 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export const TopNavigation: React.FC = () => {
+interface TopNavigationProps {
+  onNavigate: (page: string) => void;
+}
+
+export const TopNavigation: React.FC<TopNavigationProps> = ({ onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
@@ -31,7 +35,12 @@ export const TopNavigation: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" className="relative">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="relative"
+            onClick={() => onNavigate('notifications')}
+          >
             <Bell className="w-5 h-5" />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </Button>
@@ -50,8 +59,9 @@ export const TopNavigation: React.FC = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>Profile Settings</DropdownMenuItem>
-              <DropdownMenuItem>Admin Preferences</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onNavigate('profile')}>
+                Profile Settings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-red-600">Sign Out</DropdownMenuItem>
             </DropdownMenuContent>
