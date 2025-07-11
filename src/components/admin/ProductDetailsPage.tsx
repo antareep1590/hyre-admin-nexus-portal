@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { 
   ArrowLeft, 
   Edit, 
@@ -12,11 +11,9 @@ import {
   AlertTriangle,
   Calendar,
   Users,
-  ChevronDown,
   ExternalLink,
   Play
 } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface DosageOption {
   id: number;
@@ -87,14 +84,6 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
   onEdit, 
   allProducts 
 }) => {
-  const [openSections, setOpenSections] = useState({
-    general: true,
-    content: true,
-    media: true,
-    pricing: true,
-    compliance: false
-  });
-
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const relatedProduct = product.relatedProductId 
@@ -104,10 +93,6 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
   const relatedProducts = allProducts.filter(p => 
     p.category === product.category && p.id !== product.id
   ).slice(0, 3);
-
-  const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
 
   const formatContent = (content: string | string[]) => {
     if (Array.isArray(content)) {
@@ -141,397 +126,370 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Media & Basic Info */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Product Images */}
-          <Collapsible open={openSections.media} onOpenChange={() => toggleSection('media')}>
-            <Card>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Media Gallery</CardTitle>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${openSections.media ? 'rotate-180' : ''}`} />
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="space-y-4">
-                  {/* Main Image Display */}
-                  <div className="aspect-square bg-muted/30 rounded-lg overflow-hidden">
-                    {product.images && product.images.length > 0 ? (
-                      <img 
-                        src={typeof product.images[selectedImageIndex] === 'string' 
-                          ? product.images[selectedImageIndex] as string
-                          : (product.images[selectedImageIndex] as { url: string; alt: string }).url
-                        } 
-                        alt={`${product.name} ${selectedImageIndex + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-16 h-16 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Thumbnail Gallery */}
-                  {product.images && product.images.length > 1 && (
-                    <div className="grid grid-cols-4 gap-2">
-                      {product.images.slice(0, 8).map((image, index) => (
-                        <div 
-                          key={index}
-                          className={`aspect-square bg-muted/30 rounded cursor-pointer overflow-hidden border-2 transition-colors ${
-                            selectedImageIndex === index ? 'border-primary' : 'border-transparent hover:border-muted-foreground'
-                          }`}
-                          onClick={() => setSelectedImageIndex(index)}
-                        >
-                          <img 
-                            src={typeof image === 'string' ? image : (image as { url: string; alt: string }).url}
-                            alt={`${product.name} thumbnail ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Video Section */}
-                  {product.videoUrl && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Product Video</h4>
-                      <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-                        {product.videoUrl.includes('youtube.com') || product.videoUrl.includes('youtu.be') ? (
-                          <iframe
-                            src={product.videoUrl.replace('watch?v=', 'embed/')}
-                            className="w-full h-full"
-                            frameBorder="0"
-                            allowFullScreen
-                          />
-                        ) : (
-                          <video controls className="w-full h-full">
-                            <source src={product.videoUrl} type="video/mp4" />
-                            Your browser does not support the video tag.
-                          </video>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
-
-          {/* Quick Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">SKU</span>
-                  <span className="text-sm font-medium">{product.sku || 'Not set'}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <Badge variant={product.status === 'Active' ? 'default' : 'secondary'}>
-                    {product.status}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Category</span>
-                  <Badge variant="outline">{product.category}</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Merchants Using</span>
-                  <span className="text-sm font-medium">{product.merchantsUsing}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Last Updated</span>
-                  <span className="text-sm font-medium">{product.lastUpdated}</span>
-                </div>
-              </div>
-
-              {/* Business Types */}
-              {product.businessTypes && product.businessTypes.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Business Types</span>
-                  <div className="flex flex-wrap gap-1">
-                    {product.businessTypes.map((type, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {type}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Tags */}
-              {product.tags && product.tags.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Tags</span>
-                  <div className="flex flex-wrap gap-1">
-                    {product.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+      {/* Product Header Info */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Badge variant="outline">{product.category}</Badge>
+          <Badge variant={product.status === 'Active' ? 'default' : 'secondary'}>
+            {product.status}
+          </Badge>
+          {product.prescriptionRequired && (
+            <Badge variant="outline" className="text-xs">
+              <ShieldCheck className="w-3 h-3 mr-1" />
+              Prescription Required
+            </Badge>
+          )}
         </div>
+        <h1 className="text-4xl font-bold text-foreground">{product.name}</h1>
+        <p className="text-muted-foreground">Product ID: {product.id} • SKU: {product.sku || 'Not set'}</p>
+        
+        {/* Tags */}
+        {product.tags && product.tags.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-1">
+            {product.tags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
 
-        {/* Right Column - Detailed Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Product Header */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
-                  <p className="text-muted-foreground">
-                    Product ID: {product.id} • {product.category}
-                  </p>
-                </div>
-                
-                {/* Pricing Overview */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-primary">${product.basePrice || product.subscriptionPricing.oneMonth}</div>
-                    <div className="text-xs text-muted-foreground">Base Price</div>
-                  </div>
-                  {product.comparePrice && (
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-muted-foreground line-through">${product.comparePrice}</div>
-                      <div className="text-xs text-muted-foreground">Compare Price</div>
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-foreground">{product.dosageOptions.length}</div>
-                    <div className="text-xs text-muted-foreground">Dosage Options</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-foreground">{product.merchantsUsing}</div>
-                    <div className="text-xs text-muted-foreground">Active Merchants</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Business Types */}
+        {product.businessTypes && product.businessTypes.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-1">
+            {product.businessTypes.map((type, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {type}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
 
-          {/* Content Sections */}
-          <Collapsible open={openSections.content} onOpenChange={() => toggleSection('content')}>
-            <Card>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Product Content & Details</CardTitle>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${openSections.content ? 'rotate-180' : ''}`} />
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="space-y-6">
-                  {/* Description */}
-                  {product.description && (
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-3">Product Description</h4>
-                      <div className="prose max-w-none text-muted-foreground">
-                        {formatContent(product.description)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Benefits */}
-                  {product.benefits && (
-                    <div>
-                      <h4 className="font-semibold text-green-700 mb-3 flex items-center">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        Benefits
-                      </h4>
-                      <div className="prose max-w-none text-muted-foreground">
-                        {formatContent(product.benefits)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Side Effects */}
-                  {product.sideEffects && (
-                    <div>
-                      <h4 className="font-semibold text-red-700 mb-3 flex items-center">
-                        <AlertTriangle className="w-4 h-4 mr-2" />
-                        Side Effects & Warnings
-                      </h4>
-                      <div className="prose max-w-none text-muted-foreground">
-                        {formatContent(product.sideEffects)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Ingredients */}
-                  {product.ingredients && (
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-3">Ingredients & Composition</h4>
-                      <div className="prose max-w-none text-muted-foreground">
-                        {formatContent(product.ingredients)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Instructions */}
-                  {product.instructions && (
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-3">How to Use / Instructions</h4>
-                      <div className="prose max-w-none text-muted-foreground">
-                        {formatContent(product.instructions)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* FAQs */}
-                  {product.faqs && product.faqs.length > 0 && product.faqs[0].question && (
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-3">Frequently Asked Questions</h4>
-                      <div className="space-y-4">
-                        {product.faqs.map((faq, index) => (
-                          faq.question && (
-                            <div key={index} className="border-l-4 border-primary pl-4">
-                              <h5 className="font-medium text-foreground mb-1">{faq.question}</h5>
-                              <div className="prose prose-sm max-w-none text-muted-foreground">
-                                {formatContent(faq.answer)}
-                              </div>
-                            </div>
-                          )
+      {/* Media Banner */}
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[400px]">
+            {/* Main Image Display */}
+            <div className="relative bg-muted/30">
+              {product.images && product.images.length > 0 ? (
+                <div className="relative h-full min-h-[400px]">
+                  <img 
+                    src={typeof product.images[selectedImageIndex] === 'string' 
+                      ? product.images[selectedImageIndex] as string
+                      : (product.images[selectedImageIndex] as { url: string; alt: string }).url
+                    } 
+                    alt={`${product.name} ${selectedImageIndex + 1}`}
+                    className="w-full h-full object-contain p-8"
+                  />
+                  
+                  {/* Image Navigation */}
+                  {product.images.length > 1 && (
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex gap-2 overflow-x-auto justify-center">
+                        {product.images.slice(0, 6).map((image, index) => (
+                          <div 
+                            key={index}
+                            className={`flex-shrink-0 cursor-pointer transition-all ${
+                              selectedImageIndex === index ? 'ring-2 ring-primary' : 'hover:ring-1 hover:ring-muted-foreground'
+                            }`}
+                            onClick={() => setSelectedImageIndex(index)}
+                          >
+                            <img 
+                              src={typeof image === 'string' ? image : (image as { url: string; alt: string }).url}
+                              alt={`${product.name} thumbnail ${index + 1}`}
+                              className="w-16 h-16 object-cover rounded border-2 border-background"
+                            />
+                          </div>
                         ))}
                       </div>
                     </div>
                   )}
+                </div>
+              ) : (
+                <div className="h-full min-h-[400px] flex items-center justify-center">
+                  <Package className="w-24 h-24 text-muted-foreground" />
+                </div>
+              )}
+            </div>
 
-                  {/* Shipping & Returns */}
-                  {product.shippingReturns && (
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-3">Shipping & Returns</h4>
-                      <div className="prose max-w-none text-muted-foreground">
-                        {formatContent(product.shippingReturns)}
-                      </div>
-                    </div>
+            {/* Video Section */}
+            <div className="relative bg-muted/10">
+              {product.videoUrl ? (
+                <div className="h-full min-h-[400px]">
+                  {product.videoUrl.includes('youtube.com') || product.videoUrl.includes('youtu.be') ? (
+                    <iframe
+                      src={product.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allowFullScreen
+                      title={`${product.name} video`}
+                    />
+                  ) : (
+                    <video controls className="w-full h-full object-cover">
+                      <source src={product.videoUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
                   )}
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                </div>
+              ) : (
+                <div className="h-full min-h-[400px] flex items-center justify-center">
+                  <div className="text-center">
+                    <Play className="w-16 h-16 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-muted-foreground">No product video available</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-          {/* Pricing & Dosage Details */}
-          <Collapsible open={openSections.pricing} onOpenChange={() => toggleSection('pricing')}>
+      {/* Product Stats */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <div className="text-2xl font-bold text-primary">${product.basePrice || product.subscriptionPricing.oneMonth}</div>
+              <div className="text-sm text-muted-foreground">Starting Price</div>
+            </div>
+            {product.comparePrice && (
+              <div>
+                <div className="text-2xl font-bold text-muted-foreground line-through">${product.comparePrice}</div>
+                <div className="text-sm text-muted-foreground">Compare Price</div>
+              </div>
+            )}
+            <div>
+              <div className="text-2xl font-bold text-foreground">{product.dosageOptions.length}</div>
+              <div className="text-sm text-muted-foreground">Dosage Options</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-foreground">{product.merchantsUsing}</div>
+              <div className="text-sm text-muted-foreground">Active Merchants</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Content Details */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Product Description */}
+          {product.description && (
             <Card>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Pricing & Dosage Options</CardTitle>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${openSections.pricing ? 'rotate-180' : ''}`} />
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="space-y-6">
-                  {/* Subscription Pricing */}
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-3">Subscription Plans</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="border rounded-lg p-4 text-center">
-                        <div className="text-2xl font-bold text-primary mb-1">${product.subscriptionPricing.oneMonth}</div>
-                        <div className="text-sm font-medium mb-1">1 Month Plan</div>
-                        <div className="text-xs text-muted-foreground">Monthly delivery</div>
-                      </div>
-                      <div className="border-2 border-primary rounded-lg p-4 text-center bg-primary/5">
-                        <div className="text-2xl font-bold text-primary mb-1">${product.subscriptionPricing.twoMonth}</div>
-                        <div className="text-sm font-medium mb-1">2 Month Plan</div>
-                        <div className="text-xs text-muted-foreground">Every 2 months</div>
-                        <Badge variant="default" className="mt-2 text-xs">Popular</Badge>
-                      </div>
-                      <div className="border rounded-lg p-4 text-center">
-                        <div className="text-2xl font-bold text-primary mb-1">${product.subscriptionPricing.threeMonth}</div>
-                        <div className="text-sm font-medium mb-1">3 Month Plan</div>
-                        <div className="text-xs text-muted-foreground">Quarterly delivery</div>
-                        <Badge variant="outline" className="mt-2 text-xs">Best Value</Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Dosage Options */}
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-3">Available Dosages</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {product.dosageOptions.map((option, index) => (
-                        <div key={option.id || index} className="border rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium">{option.label}</span>
-                            {option.isDefault && (
-                              <Badge variant="secondary" className="text-xs">Default</Badge>
-                            )}
-                          </div>
-                          <div className="text-lg font-bold text-primary">${option.pricePerMonth}/month</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
+              <CardHeader>
+                <CardTitle>Product Description</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none text-muted-foreground">
+                  {formatContent(product.description)}
+                </div>
+              </CardContent>
             </Card>
-          </Collapsible>
+          )}
 
-          {/* Compliance & Requirements */}
-          <Collapsible open={openSections.compliance} onOpenChange={() => toggleSection('compliance')}>
+          {/* Benefits */}
+          {product.benefits && (
             <Card>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Compliance & Requirements</CardTitle>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${openSections.compliance ? 'rotate-180' : ''}`} />
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <span className="text-sm font-medium">Prescription Required</span>
-                        <Badge variant={product.prescriptionRequired ? 'default' : 'secondary'}>
-                          {product.prescriptionRequired ? 'Yes' : 'No'}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <span className="text-sm font-medium">Fulfillment Type</span>
-                        <Badge variant="outline">{product.fulfillmentType || 'Pharmacy-Shipped'}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <span className="text-sm font-medium">Age Restriction</span>
-                        <Badge variant="outline">{product.ageRestriction || 18}+</Badge>
+              <CardHeader>
+                <CardTitle className="text-green-700 flex items-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  Benefits
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none text-muted-foreground">
+                  {formatContent(product.benefits)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Side Effects */}
+          {product.sideEffects && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-red-700 flex items-center">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Side Effects & Warnings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none text-muted-foreground">
+                  {formatContent(product.sideEffects)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Ingredients */}
+          {product.ingredients && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Ingredients & Composition</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none text-muted-foreground">
+                  {formatContent(product.ingredients)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* How to Use / Instructions */}
+          {product.instructions && (
+            <Card>
+              <CardHeader>
+                <CardTitle>How to Use / Instructions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none text-muted-foreground">
+                  {formatContent(product.instructions)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Frequently Asked Questions */}
+          {product.faqs && product.faqs.length > 0 && product.faqs.some(faq => faq.question) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Frequently Asked Questions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {product.faqs.map((faq, index) => (
+                  faq.question && (
+                    <div key={index} className="border-l-4 border-primary pl-4 py-2">
+                      <h5 className="font-semibold text-foreground mb-2">{faq.question}</h5>
+                      <div className="prose prose-sm max-w-none text-muted-foreground">
+                        {formatContent(faq.answer)}
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <span className="text-sm font-medium">FDA Warning</span>
-                        <Badge variant={product.fdaWarning ? 'destructive' : 'secondary'}>
-                          {product.fdaWarning ? 'Yes' : 'No'}
-                        </Badge>
-                      </div>
-                      {product.prescriptionNotes && (
-                        <div className="p-3 border rounded-lg">
-                          <div className="text-sm font-medium mb-2">Prescription Notes</div>
-                          <div className="text-sm text-muted-foreground">{product.prescriptionNotes}</div>
-                        </div>
+                  )
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Shipping & Returns Policy */}
+          {product.shippingReturns && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Shipping & Returns Policy</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none text-muted-foreground">
+                  {formatContent(product.shippingReturns)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Right Column - Sidebar */}
+        <div className="space-y-6">
+          {/* Pricing & Subscription */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Subscription Pricing</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <div className="font-medium">1 Month</div>
+                    <div className="text-sm text-muted-foreground">Monthly delivery</div>
+                  </div>
+                  <div className="text-xl font-bold text-primary">${product.subscriptionPricing.oneMonth}</div>
+                </div>
+                <div className="flex items-center justify-between p-3 border-2 border-primary rounded-lg bg-primary/5">
+                  <div>
+                    <div className="font-medium">2 Months</div>
+                    <div className="text-sm text-muted-foreground">Every 2 months</div>
+                  </div>
+                  <div className="text-xl font-bold text-primary">${product.subscriptionPricing.twoMonth}</div>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <div className="font-medium">3 Months</div>
+                    <div className="text-sm text-muted-foreground">Quarterly delivery</div>
+                  </div>
+                  <div className="text-xl font-bold text-primary">${product.subscriptionPricing.threeMonth}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dosage Options */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Available Dosages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {product.dosageOptions.map((option, index) => (
+                  <div key={option.id || index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{option.label}</span>
+                      {option.isDefault && (
+                        <Badge variant="secondary" className="text-xs">Default</Badge>
                       )}
                     </div>
+                    <span className="font-medium text-primary">${option.pricePerMonth}/mo</span>
                   </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Compliance & Requirements */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Compliance & Requirements</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm font-medium">Prescription Required</span>
+                  <Badge variant={product.prescriptionRequired ? 'default' : 'secondary'}>
+                    {product.prescriptionRequired ? 'Yes' : 'No'}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm font-medium">Fulfillment Type</span>
+                  <Badge variant="outline">{product.fulfillmentType || 'Pharmacy-Shipped'}</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm font-medium">Age Restriction</span>
+                  <Badge variant="outline">{product.ageRestriction || 18}+</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm font-medium">FDA Warning</span>
+                  <Badge variant={product.fdaWarning ? 'destructive' : 'secondary'}>
+                    {product.fdaWarning ? 'Yes' : 'No'}
+                  </Badge>
+                </div>
+              </div>
+              
+              {product.prescriptionNotes && (
+                <div className="p-3 border rounded-lg bg-muted/30">
+                  <div className="text-sm font-medium mb-2">Prescription Notes</div>
+                  <div className="text-sm text-muted-foreground">{product.prescriptionNotes}</div>
+                </div>
+              )}
+              
+              <div className="pt-2 border-t">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Last Updated</span>
+                  <div className="flex items-center text-muted-foreground">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {product.lastUpdated}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Related Products */}
           {relatedProducts.length > 0 && (
@@ -539,38 +497,35 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
               <CardHeader>
                 <CardTitle>Related Products</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {relatedProducts.map((relatedProduct) => (
-                    <div key={relatedProduct.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-                      <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                        {relatedProduct.images && relatedProduct.images.length > 0 ? (
-                          <img 
-                            src={typeof relatedProduct.images[0] === 'string' 
-                              ? relatedProduct.images[0] as string
-                              : (relatedProduct.images[0] as { url: string; alt: string }).url
-                            }
-                            alt={relatedProduct.name}
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          <Package className="w-6 h-6 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate">{relatedProduct.name}</h4>
-                        <p className="text-xs text-muted-foreground">{relatedProduct.category}</p>
-                        <p className="text-xs font-medium">${relatedProduct.subscriptionPricing.oneMonth}/mo</p>
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
+              <CardContent className="space-y-3">
+                {relatedProducts.map((relatedProduct) => (
+                  <div key={relatedProduct.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                    <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                      {relatedProduct.images && relatedProduct.images.length > 0 ? (
+                        <img 
+                          src={typeof relatedProduct.images[0] === 'string' 
+                            ? relatedProduct.images[0] as string
+                            : (relatedProduct.images[0] as { url: string; alt: string }).url
+                          }
+                          alt={relatedProduct.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Package className="w-6 h-6 text-muted-foreground" />
+                      )}
                     </div>
-                  ))}
-                </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm truncate">{relatedProduct.name}</h4>
+                      <p className="text-xs text-muted-foreground">{relatedProduct.category}</p>
+                      <p className="text-xs font-medium text-primary">${relatedProduct.subscriptionPricing.oneMonth}/mo</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
         </div>
-
       </div>
     </div>
   );
