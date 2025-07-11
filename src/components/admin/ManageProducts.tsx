@@ -43,13 +43,28 @@ interface Product {
   id: number;
   name: string;
   category: string;
+  tags?: string[];
+  sku?: string;
+  businessTypes?: string[];
   description: string;
   benefits: string[];
   sideEffects: string[];
+  ingredients?: string;
+  instructions?: string;
+  faqs?: { question: string; answer: string; }[];
+  shippingReturns?: string;
   images: string[];
+  videoUrl?: string;
+  basePrice?: number;
+  comparePrice?: number;
   dosageOptions: DosageOption[];
   subscriptionPricing: SubscriptionPricing;
   relatedProductId?: number;
+  prescriptionRequired?: boolean;
+  fulfillmentType?: string;
+  fdaWarning?: boolean;
+  prescriptionNotes?: string;
+  ageRestriction?: number;
   status: 'Active' | 'Inactive';
   merchantsUsing: number;
   lastUpdated: string;
@@ -60,10 +75,33 @@ const mockProducts: Product[] = [
     id: 1,
     name: "Semaglutide",
     category: "Weight Loss",
+    tags: ["GLP-1", "Injectable", "Weekly"],
+    sku: "SEM-001",
+    businessTypes: ["Clinics", "Telehealth"],
     description: "A GLP-1 receptor agonist for weight management and diabetes control. This medication helps regulate blood sugar levels and promotes significant weight loss through appetite suppression and improved insulin sensitivity.",
     benefits: ["Significant weight loss", "Improved blood sugar control", "Reduced appetite", "Better cardiovascular health"],
     sideEffects: ["Nausea", "Vomiting", "Diarrhea", "Constipation"],
+    ingredients: "<p><strong>Active Ingredient:</strong> Semaglutide 0.25mg/0.5mL</p><p><strong>Inactive Ingredients:</strong> Disodium phosphate dihydrate, propylene glycol, phenol, water for injection</p>",
+    instructions: "<p><strong>Administration:</strong> Inject subcutaneously once weekly, preferably on the same day each week.</p><p><strong>Injection Sites:</strong> Thigh, abdomen, or upper arm. Rotate injection sites weekly.</p><p><strong>Storage:</strong> Store in refrigerator at 36°F to 46°F (2°C to 8°C). Do not freeze.</p>",
+    faqs: [
+      {
+        question: "How long before I see results?",
+        answer: "Most patients begin to see weight loss within 4-6 weeks of starting treatment. Significant results are typically observed after 12-16 weeks."
+      },
+      {
+        question: "Can I take this with other medications?",
+        answer: "Please consult with your healthcare provider about all medications you're taking. Some medications may interact with Semaglutide."
+      },
+      {
+        question: "What should I do if I miss a dose?",
+        answer: "If you miss a dose and it's been less than 5 days, take it as soon as possible. If more than 5 days have passed, skip the missed dose and continue with your regular schedule."
+      }
+    ],
+    shippingReturns: "<p><strong>Shipping:</strong> All medications are shipped via temperature-controlled overnight delivery to ensure product integrity.</p><p><strong>Returns:</strong> Due to the nature of prescription medications, returns are not accepted unless the product was damaged during shipping. Contact customer service within 24 hours of delivery for damaged products.</p>",
     images: ["/placeholder.svg"],
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    basePrice: 299,
+    comparePrice: 399,
     dosageOptions: [
       { id: 1, label: "0.25mg", pricePerMonth: 299, isDefault: true },
       { id: 2, label: "0.5mg", pricePerMonth: 399, isDefault: false },
@@ -74,6 +112,11 @@ const mockProducts: Product[] = [
       twoMonth: 579,
       threeMonth: 849
     },
+    prescriptionRequired: true,
+    fulfillmentType: "Pharmacy-Shipped",
+    fdaWarning: false,
+    prescriptionNotes: "Requires consultation with licensed healthcare provider. Not suitable for patients with personal or family history of medullary thyroid carcinoma.",
+    ageRestriction: 18,
     status: "Active",
     merchantsUsing: 15,
     lastUpdated: "2024-01-15"
@@ -82,10 +125,29 @@ const mockProducts: Product[] = [
     id: 2,
     name: "Tirzepatide",
     category: "Weight Loss",
+    tags: ["GIP/GLP-1", "Injectable", "Weekly"],
+    sku: "TIR-001",
+    businessTypes: ["Clinics", "Wellness Centers"],
     description: "Dual GIP/GLP-1 receptor agonist for enhanced weight loss results. This advanced medication combines two hormone pathways for superior glucose control and weight management.",
     benefits: ["Superior weight loss", "Excellent glucose control", "Improved insulin sensitivity"],
     sideEffects: ["Nausea", "Decreased appetite", "Vomiting", "Diarrhea"],
+    ingredients: "<p><strong>Active Ingredient:</strong> Tirzepatide 2.5mg/0.5mL</p><p><strong>Inactive Ingredients:</strong> Sodium chloride, sodium phosphate dibasic heptahydrate, water for injection</p>",
+    instructions: "<p><strong>Administration:</strong> Inject subcutaneously once weekly at any time of day, with or without food.</p><p><strong>Injection Sites:</strong> Thigh, abdomen, or upper arm. Rotate injection sites with each dose.</p><p><strong>Storage:</strong> Store in original carton in refrigerator. Protect from light.</p>",
+    faqs: [
+      {
+        question: "How is Tirzepatide different from Semaglutide?",
+        answer: "Tirzepatide targets both GIP and GLP-1 receptors, while Semaglutide only targets GLP-1. This dual action may result in more significant weight loss for some patients."
+      },
+      {
+        question: "What are the most common side effects?",
+        answer: "The most common side effects include nausea, vomiting, diarrhea, and decreased appetite. These typically improve over time as your body adjusts to the medication."
+      }
+    ],
+    shippingReturns: "<p><strong>Shipping:</strong> Free overnight shipping with temperature monitoring. Signature required upon delivery.</p><p><strong>Returns:</strong> Returns accepted only for manufacturing defects or shipping damage. Must be reported within 24 hours of delivery.</p>",
     images: ["/placeholder.svg"],
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    basePrice: 399,
+    comparePrice: 499,
     dosageOptions: [
       { id: 4, label: "2.5mg", pricePerMonth: 399, isDefault: true },
       { id: 5, label: "5.0mg", pricePerMonth: 499, isDefault: false },
@@ -97,6 +159,11 @@ const mockProducts: Product[] = [
       threeMonth: 1149
     },
     relatedProductId: 1,
+    prescriptionRequired: true,
+    fulfillmentType: "Pharmacy-Shipped",
+    fdaWarning: false,
+    prescriptionNotes: "Requires comprehensive medical evaluation. Monitor for signs of pancreatitis and gallbladder disease.",
+    ageRestriction: 18,
     status: "Active",
     merchantsUsing: 8,
     lastUpdated: "2024-01-12"
