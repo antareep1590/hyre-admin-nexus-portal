@@ -12,12 +12,11 @@ interface ConsumerDetailsPageProps {}
 interface SubscribedProduct {
   id: number;
   name: string;
-  category: string;
-  subscriptionDate: string;
+  dosage: string;
+  planType: string;
+  nextShipment: string;
+  billingDate: string;
   status: 'Active' | 'Paused' | 'Cancelled';
-  nextDelivery: string;
-  price: number;
-  frequency: string;
 }
 
 interface QuestionnaireSubmission {
@@ -67,22 +66,20 @@ const mockSubscribedProducts: SubscribedProduct[] = [
   {
     id: 1,
     name: "Weight Management",
-    category: "Health & Wellness",
-    subscriptionDate: "2024-01-15",
-    status: "Active",
-    nextDelivery: "2024-02-15",
-    price: 199,
-    frequency: "Monthly"
+    dosage: "1 tablet daily",
+    planType: "Premium",
+    nextShipment: "2024-02-15",
+    billingDate: "2024-02-01",
+    status: "Active"
   },
   {
     id: 2,
     name: "Wellness Supplement",
-    category: "Supplements",
-    subscriptionDate: "2024-01-20",
-    status: "Active",
-    nextDelivery: "2024-02-20",
-    price: 89,
-    frequency: "Monthly"
+    dosage: "2 capsules daily",
+    planType: "Standard",
+    nextShipment: "2024-02-20",
+    billingDate: "2024-02-05",
+    status: "Active"
   }
 ];
 
@@ -223,7 +220,7 @@ export const ConsumerDetailsPage: React.FC<ConsumerDetailsPageProps> = () => {
                   <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <div className="font-medium text-sm">{product.name}</div>
-                      <div className="text-xs text-gray-500">{product.category}</div>
+                      <div className="text-xs text-gray-500">{product.planType}</div>
                     </div>
                     <Badge className={getStatusColor(product.status)}>
                       {product.status}
@@ -272,32 +269,30 @@ export const ConsumerDetailsPage: React.FC<ConsumerDetailsPageProps> = () => {
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="text-left py-3 px-4 font-medium text-gray-700">Product Name</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Category</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Subscription Date</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Next Delivery</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Price</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Frequency</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Dosage</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Plan Type</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Next Shipment</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Billing Date</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Subscription Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {mockSubscribedProducts.map((product) => (
                       <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-3 px-4 font-medium">{product.name}</td>
-                        <td className="py-3 px-4 text-gray-600">{product.category}</td>
+                        <td className="py-3 px-4 text-gray-600">{product.dosage}</td>
+                        <td className="py-3 px-4 text-gray-600">{product.planType}</td>
+                        <td className="py-3 px-4 text-gray-600">
+                          {new Date(product.nextShipment).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4 text-gray-600">
+                          {new Date(product.billingDate).toLocaleDateString()}
+                        </td>
                         <td className="py-3 px-4">
                           <Badge className={getStatusColor(product.status)}>
                             {product.status}
                           </Badge>
                         </td>
-                        <td className="py-3 px-4 text-gray-600">
-                          {new Date(product.subscriptionDate).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4 text-gray-600">
-                          {new Date(product.nextDelivery).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4 font-medium">${product.price}</td>
-                        <td className="py-3 px-4 text-gray-600">{product.frequency}</td>
                       </tr>
                     ))}
                   </tbody>
