@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Filter, Eye, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -109,11 +110,11 @@ const merchants = [
 ];
 
 export const ConsumerDirectory: React.FC = () => {
+  const navigate = useNavigate();
   const [consumers, setConsumers] = useState<Consumer[]>(mockConsumers);
   const [searchQuery, setSearchQuery] = useState('');
   const [merchantFilter, setMerchantFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [viewingConsumer, setViewingConsumer] = useState<Consumer | null>(null);
 
   const filteredConsumers = consumers.filter(consumer => {
     const matchesSearch = 
@@ -128,7 +129,7 @@ export const ConsumerDirectory: React.FC = () => {
   });
 
   const handleViewConsumer = (consumer: Consumer) => {
-    setViewingConsumer(consumer);
+    navigate(`/admin/consumers/${consumer.id}`);
   };
 
   const totalConsumers = consumers.length;
@@ -300,99 +301,14 @@ export const ConsumerDirectory: React.FC = () => {
                       <span className="text-gray-600">{new Date(consumer.joinDate).toLocaleDateString()}</span>
                     </td>
                     <td className="py-3 px-4">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewConsumer(consumer)}
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            View Profile
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>Consumer Profile</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-6">
-                            <div className="flex items-center space-x-4">
-                              <Avatar className="w-16 h-16">
-                                <AvatarImage src={consumer.avatarUrl} alt={consumer.name} />
-                                <AvatarFallback className="text-lg">
-                                  {consumer.name.split(' ').map(n => n[0]).join('')}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <h3 className="text-xl font-semibold text-gray-900">{consumer.name}</h3>
-                                <p className="text-gray-600">{consumer.merchantName}</p>
-                                <Badge 
-                                  variant={consumer.status === 'Active' ? 'default' : 'secondary'}
-                                  className={consumer.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
-                                >
-                                  {consumer.status}
-                                </Badge>
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-4">
-                                <div className="flex items-center space-x-2">
-                                  <Mail className="w-4 h-4 text-gray-500" />
-                                  <span className="text-sm text-gray-600">{consumer.email}</span>
-                                </div>
-                                
-                                {consumer.phone && (
-                                  <div className="flex items-center space-x-2">
-                                    <Phone className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm text-gray-600">{consumer.phone}</span>
-                                  </div>
-                                )}
-                                
-                                {consumer.location && (
-                                  <div className="flex items-center space-x-2">
-                                    <MapPin className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm text-gray-600">{consumer.location}</span>
-                                  </div>
-                                )}
-                                
-                                <div className="flex items-center space-x-2">
-                                  <Calendar className="w-4 h-4 text-gray-500" />
-                                  <span className="text-sm text-gray-600">
-                                    Joined {new Date(consumer.joinDate).toLocaleDateString()}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="space-y-4">
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                  <h4 className="font-medium text-gray-900 mb-2">Activity Summary</h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Active Subscriptions:</span>
-                                      <span className="font-medium">{consumer.subscriptionCount}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Total Spent:</span>
-                                      <span className="font-medium">${consumer.totalSpent}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Prescriptions:</span>
-                                      <span className="font-medium">{consumer.prescriptions}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Last Activity:</span>
-                                      <span className="font-medium">
-                                        {new Date(consumer.lastActivity).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewConsumer(consumer)}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        View Profile
+                      </Button>
                     </td>
                   </tr>
                 ))}

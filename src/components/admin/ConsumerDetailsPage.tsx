@@ -5,11 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Mail, Phone, Calendar, MapPin, Package } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
-interface ConsumerDetailsPageProps {
-  consumerId?: string;
-}
+interface ConsumerDetailsPageProps {}
 
 interface SubscribedProduct {
   id: number;
@@ -88,8 +86,9 @@ const mockSubscribedProducts: SubscribedProduct[] = [
   }
 ];
 
-export const ConsumerDetailsPage: React.FC<ConsumerDetailsPageProps> = ({ consumerId }) => {
+export const ConsumerDetailsPage: React.FC<ConsumerDetailsPageProps> = () => {
   const navigate = useNavigate();
+  const { consumerId } = useParams();
 
   const handleBack = () => {
     navigate('/admin/consumers');
