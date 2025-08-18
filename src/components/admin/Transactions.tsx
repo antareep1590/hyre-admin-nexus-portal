@@ -328,6 +328,7 @@ export const Transactions: React.FC = () => {
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Payment Method</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Notes</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -376,6 +377,35 @@ export const Transactions: React.FC = () => {
                       <span className="truncate block" title={transaction.notes}>
                         {transaction.notes || '-'}
                       </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex space-x-2">
+                        {/* Refund button for successful Purchase/Upcharge transactions */}
+                        {['Purchase', 'Upcharge'].includes(transaction.transactionType) && 
+                         transaction.status === 'Successful' && (
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={() => console.log('Refund transaction:', transaction.id)}
+                          >
+                            Refund
+                          </Button>
+                        )}
+                        
+                        {/* Process payout button for pending payout transactions */}
+                        {transaction.transactionType === 'Payout' && 
+                         transaction.status === 'Pending' && (
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-green-600 border-green-200 hover:bg-green-50"
+                            onClick={() => console.log('Process payout:', transaction.id)}
+                          >
+                            Process Payout
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

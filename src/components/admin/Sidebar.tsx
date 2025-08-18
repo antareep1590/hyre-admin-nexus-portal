@@ -29,7 +29,7 @@ const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'merchants', label: 'Merchant Management', icon: Users },
   { id: 'subscription', label: 'Subscription Plan', icon: CreditCard },
-  { id: 'payouts', label: 'Payouts', icon: DollarSign },
+  { id: 'payouts', label: 'Transactions', icon: DollarSign },
   { id: 'domains', label: 'Domain & Branding', icon: Globe },
   { id: 'templates', label: 'Template Library', icon: FileText },
   { id: 'categories', label: 'Categories', icon: Package },
