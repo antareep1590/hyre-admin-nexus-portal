@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { 
   DollarSign, 
   Filter, 
@@ -20,6 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface Transaction {
   id: string;
@@ -41,6 +50,10 @@ export const Transactions: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateRangeFilter, setDateRangeFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [payoutAmount, setPayoutAmount] = useState('');
+  const [payoutNote, setPayoutNote] = useState('');
 
   const transactions: Transaction[] = [
     {
@@ -107,8 +120,29 @@ export const Transactions: React.FC = () => {
       paymentMethod: 'Credit Card',
       status: 'Failed',
       notes: 'Payment declined'
+    },
+    {
+      id: '6',
+      date: '2024-01-15',
+      transactionId: 'PAY-2024-002',
+      merchantName: 'Peak Performance',
+      customerName: 'System',
+      customerEmail: 'system@platform.com',
+      transactionType: 'Payout',
+      amount: -1250.00,
+      paymentMethod: 'Bank Transfer',
+      status: 'Pending',
+      notes: 'Pending payout approval'
     }
   ];
+
+  // Available balance for merchant payouts (mock data)
+  const merchantBalances = {
+    'Revive Clinic': 2450.00,
+    'FitLife Gym': 890.50,
+    'WellSpace Therapy': 1560.25,
+    'Peak Performance': 1250.00
+  };
 
   const merchants = ['Revive Clinic', 'FitLife Gym', 'WellSpace Therapy', 'Peak Performance'];
 
@@ -169,6 +203,29 @@ export const Transactions: React.FC = () => {
 
   const handleExport = () => {
     console.log('Exporting transactions with current filters...');
+  };
+
+  const handleProcessPayout = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setPayoutAmount(Math.abs(transaction.amount).toString());
+    setPayoutNote(transaction.notes || '');
+    setIsPayoutModalOpen(true);
+  };
+
+  const confirmPayout = () => {
+    if (selectedTransaction) {
+      console.log('Processing payout:', {
+        transactionId: selectedTransaction.id,
+        merchantName: selectedTransaction.merchantName,
+        amount: payoutAmount,
+        note: payoutNote
+      });
+      // Here you would typically call an API to process the payout
+      setIsPayoutModalOpen(false);
+      setSelectedTransaction(null);
+      setPayoutAmount('');
+      setPayoutNote('');
+    }
   };
 
   return (
@@ -400,7 +457,7 @@ export const Transactions: React.FC = () => {
                             size="sm" 
                             variant="outline" 
                             className="text-green-600 border-green-200 hover:bg-green-50"
-                            onClick={() => console.log('Process payout:', transaction.id)}
+                            onClick={() => handleProcessPayout(transaction)}
                           >
                             Process Payout
                           </Button>
@@ -419,6 +476,75 @@ export const Transactions: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Process Payout Modal */}
+      <Dialog open={isPayoutModalOpen} onOpenChange={setIsPayoutModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Process Payout</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedTransaction && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Merchant</Label>
+                  <p className="text-sm text-gray-600">{selectedTransaction.merchantName}</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Available Balance</Label>
+                  <p className="text-lg font-semibold text-green-600">
+                    ${merchantBalances[selectedTransaction.merchantName as keyof typeof merchantBalances]?.toLocaleString() || '0.00'}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="amount" className="text-sm font-medium">
+                    Payout Amount
+                  </Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    value={payoutAmount}
+                    onChange={(e) => setPayoutAmount(e.target.value)}
+                    placeholder="Enter amount"
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="note" className="text-sm font-medium">
+                    Note (Optional)
+                  </Label>
+                  <Textarea
+                    id="note"
+                    value={payoutNote}
+                    onChange={(e) => setPayoutNote(e.target.value)}
+                    placeholder="Add a note for this payout..."
+                    className="w-full"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsPayoutModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={confirmPayout}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Process Payout
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
