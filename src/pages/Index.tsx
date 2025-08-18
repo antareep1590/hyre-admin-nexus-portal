@@ -6,7 +6,7 @@ import { Dashboard } from '@/components/admin/Dashboard';
 import { MerchantManagement } from '@/components/admin/MerchantManagement';
 import { MerchantDetails } from '@/components/admin/MerchantDetails';
 import { SubscriptionPlan } from '@/components/admin/SubscriptionPlan';
-import { Payouts } from '@/components/admin/Payouts';
+import { Transactions } from '@/components/admin/Transactions';
 import { DomainBranding } from '@/components/admin/DomainBranding';
 import { TemplateLibrary } from '@/components/admin/TemplateLibrary';
 import { ActivityLogs } from '@/components/admin/ActivityLogs';
@@ -47,7 +47,7 @@ const Index = () => {
       case 'subscription':
         return <SubscriptionPlan />;
       case 'payouts':
-        return <Payouts />;
+        return <Transactions />;
       case 'domains':
         return <DomainBranding />;
       case 'templates':
