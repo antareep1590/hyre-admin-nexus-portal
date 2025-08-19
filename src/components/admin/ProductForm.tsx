@@ -125,6 +125,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   });
 
   const [currentTag, setCurrentTag] = useState('');
+  const [marginPercentage, setMarginPercentage] = useState<number>(0);
   const [openSections, setOpenSections] = useState({
     general: true,
     content: false,
@@ -190,6 +191,33 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const removeDosageOption = (index: number) => {
     updateField('dosageOptions', formData.dosageOptions.filter((_, i) => i !== index));
+  };
+
+  const applyMarginPricing = (margin: number) => {
+    if (margin <= 0 || !formData.basePrice) return;
+    
+    const basePrice = formData.basePrice;
+    const originalPrice = basePrice * (1 - margin / 100);
+    
+    // Update original price (compare price)
+    updateField('comparePrice', Math.round(originalPrice * 100) / 100);
+    
+    // Update all dosage option prices
+    const updatedDosageOptions = formData.dosageOptions.map(option => ({
+      ...option,
+      pricePerMonth: Math.round(basePrice * 100) / 100,
+      priceTwoMonth: Math.round((basePrice * 2 * 0.95) * 100) / 100, // 5% discount for 2 months
+      priceThreeMonth: Math.round((basePrice * 3 * 0.9) * 100) / 100 // 10% discount for 3 months
+    }));
+    
+    updateField('dosageOptions', updatedDosageOptions);
+  };
+
+  const handleMarginChange = (value: number) => {
+    setMarginPercentage(value);
+    if (value > 0) {
+      applyMarginPricing(value);
+    }
   };
 
   const handleImageUpload = (files: FileList | null) => {
@@ -641,6 +669,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-6">
+                {/* Margin Percentage */}
+                <div className="space-y-3">
+                  <Label htmlFor="margin-percentage">Set Margin %</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enter a margin percentage to auto-calculate all pricing fields based on your base price
+                  </p>
+                  <Input
+                    id="margin-percentage"
+                    type="number"
+                    value={marginPercentage}
+                    onChange={(e) => handleMarginChange(parseFloat(e.target.value) || 0)}
+                    placeholder="e.g., 25"
+                    className="max-w-xs"
+                  />
+                </div>
+
+                <Separator />
+
                 {/* Base Pricing */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
