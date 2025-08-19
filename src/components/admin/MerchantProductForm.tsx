@@ -209,12 +209,6 @@ export const MerchantProductForm: React.FC<MerchantProductFormProps> = ({
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="space-y-2">
-                        <Label className="text-xs">Base Price</Label>
-                        <div className="p-2 bg-muted rounded-md">
-                          <span className="text-sm font-medium">${product.basePrice}</span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
                         <Label className="text-xs">Original Price</Label>
                         <div className="p-2 bg-muted rounded-md">
                           <span className="text-sm font-medium">${product.comparePrice}</span>
@@ -236,16 +230,6 @@ export const MerchantProductForm: React.FC<MerchantProductFormProps> = ({
                           type="number"
                           value={formData.merchantBasePrice}
                           onChange={(e) => updateField('merchantBasePrice', parseFloat(e.target.value) || 0)}
-                          placeholder="0.00"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="merchant-compare-price">Your Original Price</Label>
-                        <Input
-                          id="merchant-compare-price"
-                          type="number"
-                          value={formData.merchantComparePrice}
-                          onChange={(e) => updateField('merchantComparePrice', parseFloat(e.target.value) || 0)}
                           placeholder="0.00"
                         />
                       </div>
