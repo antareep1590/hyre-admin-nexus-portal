@@ -650,13 +650,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="compare-price">Compare at Price (Optional)</Label>
+                    <Label htmlFor="compare-price">Original Price</Label>
                     <Input
                       id="compare-price"
                       type="number"
                       value={formData.comparePrice}
                       onChange={(e) => updateField('comparePrice', parseFloat(e.target.value) || 0)}
                       placeholder="0.00"
+                      disabled
                     />
                   </div>
                 </div>
