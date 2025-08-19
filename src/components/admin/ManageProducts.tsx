@@ -21,10 +21,11 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Search, Edit, Package, Eye, Upload, X } from 'lucide-react';
+import { Plus, Search, Edit, Package, Eye, Upload, X, DollarSign } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductDetailsPage } from './ProductDetailsPage';
 import { ProductForm } from './ProductForm';
+import { MerchantProductForm } from './MerchantProductForm';
 
 interface DosageOption {
   id: number;
@@ -205,6 +206,8 @@ export const ManageProducts: React.FC = () => {
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('list');
   const [showProductForm, setShowProductForm] = useState(false);
+  const [merchantPricingProduct, setMerchantPricingProduct] = useState<Product | null>(null);
+  const [showMerchantPricing, setShowMerchantPricing] = useState(false);
 
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -427,6 +430,48 @@ export const ManageProducts: React.FC = () => {
     setEditingProduct(null);
   };
 
+  const handleMerchantPricing = (product: Product) => {
+    // Ensure required fields for MerchantProductForm
+    const productWithRequiredFields = {
+      ...product,
+      basePrice: product.basePrice || product.dosageOptions[0]?.pricePerMonth || 0,
+      comparePrice: product.comparePrice || (product.basePrice || product.dosageOptions[0]?.pricePerMonth || 0) * 1.2
+    } as Product & { basePrice: number; comparePrice: number };
+    setMerchantPricingProduct(productWithRequiredFields);
+    setShowMerchantPricing(true);
+  };
+
+  const handleMerchantPricingSave = (productData: any, isDraft = false) => {
+    console.log('Merchant pricing saved:', productData, isDraft);
+    setShowMerchantPricing(false);
+    setMerchantPricingProduct(null);
+  };
+
+  const handleMerchantPricingCancel = () => {
+    setShowMerchantPricing(false);
+    setMerchantPricingProduct(null);
+  };
+
+  if (showMerchantPricing && merchantPricingProduct) {
+    // Transform Product to ProductData format for MerchantProductForm
+    const productData = {
+      id: merchantPricingProduct.id,
+      name: merchantPricingProduct.name,
+      category: merchantPricingProduct.category,
+      basePrice: merchantPricingProduct.basePrice || merchantPricingProduct.dosageOptions[0]?.pricePerMonth || 0,
+      comparePrice: merchantPricingProduct.comparePrice || (merchantPricingProduct.basePrice || merchantPricingProduct.dosageOptions[0]?.pricePerMonth || 0) * 1.2,
+      dosageOptions: merchantPricingProduct.dosageOptions
+    };
+
+    return (
+      <MerchantProductForm
+        product={productData}
+        onSave={handleMerchantPricingSave}
+        onCancel={handleMerchantPricingCancel}
+      />
+    );
+  }
+
   if (showProductForm) {
     // Transform product data for the form
     const productForForm = editingProduct ? {
@@ -581,6 +626,15 @@ export const ManageProducts: React.FC = () => {
                       >
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMerchantPricing(product)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        <DollarSign className="w-4 h-4 mr-1" />
+                        Merchant Pricing
                       </Button>
                     </div>
                   </TableCell>
