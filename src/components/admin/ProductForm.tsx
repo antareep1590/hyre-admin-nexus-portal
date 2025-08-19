@@ -27,6 +27,8 @@ interface DosageOption {
   id: number;
   label: string;
   pricePerMonth: number;
+  priceTwoMonth: number;
+  priceThreeMonth: number;
   isDefault: boolean;
 }
 
@@ -111,9 +113,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     images: product?.images || [],
     videoUrl: product?.videoUrl || '',
     basePrice: product?.basePrice || 0,
-    comparePrice: product?.comparePrice || 0,
+    comparePrice: product?.comparePrice || (product?.basePrice ? product.basePrice * 1.25 : 0),
     subscriptionPricing: product?.subscriptionPricing || { oneMonth: 0, twoMonth: 0, threeMonth: 0 },
-    dosageOptions: product?.dosageOptions || [{ id: 1, label: '', pricePerMonth: 0, isDefault: true }],
+    dosageOptions: product?.dosageOptions || [{ id: 1, label: '', pricePerMonth: 0, priceTwoMonth: 0, priceThreeMonth: 0, isDefault: true }],
     relatedProductIds: product?.relatedProductIds || [],
     prescriptionRequired: product?.prescriptionRequired || false,
     fulfillmentType: product?.fulfillmentType || 'Pharmacy-Shipped',
@@ -166,6 +168,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       id: Date.now(),
       label: '',
       pricePerMonth: 0,
+      priceTwoMonth: 0,
+      priceThreeMonth: 0,
       isDefault: false
     };
     updateField('dosageOptions', [...formData.dosageOptions, newOption]);
@@ -662,48 +666,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   </div>
                 </div>
 
-                {/* Subscription Pricing */}
-                <div className="space-y-3">
-                  <Label>Subscription Pricing</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="one-month">1 Month</Label>
-                      <Input
-                        id="one-month"
-                        type="number"
-                        value={formData.subscriptionPricing.oneMonth}
-                        onChange={(e) => updateField('subscriptionPricing', {
-                          ...formData.subscriptionPricing,
-                          oneMonth: parseFloat(e.target.value) || 0
-                        })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="two-month">2 Months</Label>
-                      <Input
-                        id="two-month"
-                        type="number"
-                        value={formData.subscriptionPricing.twoMonth}
-                        onChange={(e) => updateField('subscriptionPricing', {
-                          ...formData.subscriptionPricing,
-                          twoMonth: parseFloat(e.target.value) || 0
-                        })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="three-month">3 Months</Label>
-                      <Input
-                        id="three-month"
-                        type="number"
-                        value={formData.subscriptionPricing.threeMonth}
-                        onChange={(e) => updateField('subscriptionPricing', {
-                          ...formData.subscriptionPricing,
-                          threeMonth: parseFloat(e.target.value) || 0
-                        })}
-                      />
-                    </div>
-                  </div>
-                </div>
 
                 {/* Dosage Options */}
                 <div className="space-y-3">
@@ -718,35 +680,57 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     {formData.dosageOptions.map((option, index) => (
                       <Card key={option.id} className="border border-border">
                         <CardContent className="pt-4">
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                            <div className="space-y-2">
-                              <Label>Dosage Name</Label>
-                              <Input
-                                placeholder="e.g., 0.25mg"
-                                value={option.label}
-                                onChange={(e) => updateDosageOption(index, 'label', e.target.value)}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Price per Month</Label>
-                              <Input
-                                type="number"
-                                placeholder="0.00"
-                                value={option.pricePerMonth}
-                                onChange={(e) => updateDosageOption(index, 'pricePerMonth', parseFloat(e.target.value) || 0)}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Default Option</Label>
-                              <div className="flex items-center space-x-2">
-                                <Switch
-                                  checked={option.isDefault}
-                                  onCheckedChange={(checked) => updateDosageOption(index, 'isDefault', checked)}
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Dosage Name</Label>
+                                <Input
+                                  placeholder="e.g., 0.25mg"
+                                  value={option.label}
+                                  onChange={(e) => updateDosageOption(index, 'label', e.target.value)}
                                 />
-                                <span className="text-xs">Default</span>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Default Option</Label>
+                                <div className="flex items-center space-x-2">
+                                  <Switch
+                                    checked={option.isDefault}
+                                    onCheckedChange={(checked) => updateDosageOption(index, 'isDefault', checked)}
+                                  />
+                                  <span className="text-xs">Default</span>
+                                </div>
                               </div>
                             </div>
-                            <div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="space-y-2">
+                                <Label>1 Month Price</Label>
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  value={option.pricePerMonth}
+                                  onChange={(e) => updateDosageOption(index, 'pricePerMonth', parseFloat(e.target.value) || 0)}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>2 Months Price</Label>
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  value={option.priceTwoMonth}
+                                  onChange={(e) => updateDosageOption(index, 'priceTwoMonth', parseFloat(e.target.value) || 0)}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>3 Months Price</Label>
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  value={option.priceThreeMonth}
+                                  onChange={(e) => updateDosageOption(index, 'priceThreeMonth', parseFloat(e.target.value) || 0)}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-end">
                               {formData.dosageOptions.length > 1 && (
                                 <Button
                                   type="button"
@@ -754,7 +738,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                   size="sm"
                                   onClick={() => removeDosageOption(index)}
                                 >
-                                  <X className="w-4 h-4" />
+                                  <X className="w-4 h-4 mr-2" />
+                                  Remove
                                 </Button>
                               )}
                             </div>

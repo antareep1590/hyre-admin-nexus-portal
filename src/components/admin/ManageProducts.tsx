@@ -30,6 +30,8 @@ interface DosageOption {
   id: number;
   label: string;
   pricePerMonth: number;
+  priceTwoMonth: number;
+  priceThreeMonth: number;
   isDefault: boolean;
 }
 
@@ -103,9 +105,9 @@ const mockProducts: Product[] = [
     basePrice: 299,
     comparePrice: 399,
     dosageOptions: [
-      { id: 1, label: "0.25mg", pricePerMonth: 299, isDefault: true },
-      { id: 2, label: "0.5mg", pricePerMonth: 399, isDefault: false },
-      { id: 3, label: "1.0mg", pricePerMonth: 499, isDefault: false }
+      { id: 1, label: "0.25mg", pricePerMonth: 299, priceTwoMonth: 579, priceThreeMonth: 849, isDefault: true },
+      { id: 2, label: "0.5mg", pricePerMonth: 399, priceTwoMonth: 779, priceThreeMonth: 1149, isDefault: false },
+      { id: 3, label: "1.0mg", pricePerMonth: 499, priceTwoMonth: 979, priceThreeMonth: 1449, isDefault: false }
     ],
     subscriptionPricing: {
       oneMonth: 299,
@@ -149,9 +151,9 @@ const mockProducts: Product[] = [
     basePrice: 399,
     comparePrice: 499,
     dosageOptions: [
-      { id: 4, label: "2.5mg", pricePerMonth: 399, isDefault: true },
-      { id: 5, label: "5.0mg", pricePerMonth: 499, isDefault: false },
-      { id: 6, label: "7.5mg", pricePerMonth: 599, isDefault: false }
+      { id: 4, label: "2.5mg", pricePerMonth: 399, priceTwoMonth: 779, priceThreeMonth: 1149, isDefault: true },
+      { id: 5, label: "5.0mg", pricePerMonth: 499, priceTwoMonth: 979, priceThreeMonth: 1449, isDefault: false },
+      { id: 6, label: "7.5mg", pricePerMonth: 599, priceTwoMonth: 1179, priceThreeMonth: 1749, isDefault: false }
     ],
     subscriptionPricing: {
       oneMonth: 399,
@@ -177,8 +179,8 @@ const mockProducts: Product[] = [
     sideEffects: ["Mild fatigue initially", "Temporary headache", "Injection site reaction"],
     images: ["/placeholder.svg"],
     dosageOptions: [
-      { id: 7, label: "250mg", pricePerMonth: 199, isDefault: true },
-      { id: 8, label: "500mg", pricePerMonth: 299, isDefault: false }
+      { id: 7, label: "250mg", pricePerMonth: 199, priceTwoMonth: 389, priceThreeMonth: 569, isDefault: true },
+      { id: 8, label: "500mg", pricePerMonth: 299, priceTwoMonth: 579, priceThreeMonth: 849, isDefault: false }
     ],
     subscriptionPricing: {
       oneMonth: 199,
@@ -211,7 +213,7 @@ export const ManageProducts: React.FC = () => {
     benefits: [''],
     sideEffects: [''],
     images: [] as string[],
-    dosageOptions: [{ label: '', pricePerMonth: 0, isDefault: true }] as Omit<DosageOption, 'id'>[],
+    dosageOptions: [{ label: '', pricePerMonth: 0, priceTwoMonth: 0, priceThreeMonth: 0, isDefault: true }] as Omit<DosageOption, 'id'>[],
     subscriptionPricing: { oneMonth: 0, twoMonth: 0, threeMonth: 0 },
     relatedProductId: undefined as number | undefined,
     status: 'Active' as 'Active' | 'Inactive'
@@ -249,7 +251,7 @@ export const ManageProducts: React.FC = () => {
       benefits: [''],
       sideEffects: [''],
       images: [],
-      dosageOptions: [{ label: '', pricePerMonth: 0, isDefault: true }],
+      dosageOptions: [{ label: '', pricePerMonth: 0, priceTwoMonth: 0, priceThreeMonth: 0, isDefault: true }],
       subscriptionPricing: { oneMonth: 0, twoMonth: 0, threeMonth: 0 },
       relatedProductId: undefined,
       status: 'Active'
@@ -317,7 +319,7 @@ export const ManageProducts: React.FC = () => {
   const addDosageOption = () => {
     setNewProduct({
       ...newProduct,
-      dosageOptions: [...newProduct.dosageOptions, { label: '', pricePerMonth: 0, isDefault: false }]
+      dosageOptions: [...newProduct.dosageOptions, { label: '', pricePerMonth: 0, priceTwoMonth: 0, priceThreeMonth: 0, isDefault: false }]
     });
   };
 
