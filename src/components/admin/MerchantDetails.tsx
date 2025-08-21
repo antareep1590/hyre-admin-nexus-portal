@@ -15,6 +15,10 @@ interface MerchantDetailsProps {
 export const MerchantDetails: React.FC<MerchantDetailsProps> = ({ merchantId, onBack }) => {
   const [editingCommission, setEditingCommission] = useState(false);
   const [commissionRate, setCommissionRate] = useState('15');
+  const [editingMerchantId, setEditingMerchantId] = useState(false);
+  const [merchantIdValue, setMerchantIdValue] = useState('MER-001-2024');
+  const [editingApiKey, setEditingApiKey] = useState(false);
+  const [apiKeyValue, setApiKeyValue] = useState('sk_live_xxxxxxxxxxxxxxxxxxxx');
 
   // Mock merchant data
   const merchant = {
@@ -50,6 +54,16 @@ export const MerchantDetails: React.FC<MerchantDetailsProps> = ({ merchantId, on
   const handleSaveCommission = () => {
     console.log('Saving commission rate:', commissionRate);
     setEditingCommission(false);
+  };
+
+  const handleSaveMerchantId = () => {
+    console.log('Saving merchant ID:', merchantIdValue);
+    setEditingMerchantId(false);
+  };
+
+  const handleSaveApiKey = () => {
+    console.log('Saving API key:', apiKeyValue);
+    setEditingApiKey(false);
   };
 
   if (!merchant) {
@@ -163,6 +177,60 @@ export const MerchantDetails: React.FC<MerchantDetailsProps> = ({ merchantId, on
             <div>
               <label className="text-sm font-medium text-gray-700">Total Revenue</label>
               <p className="text-gray-900 font-semibold">{merchant.totalRevenue}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Merchant ID (M-ID)</label>
+              {editingMerchantId ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="text"
+                    value={merchantIdValue}
+                    onChange={(e) => setMerchantIdValue(e.target.value)}
+                    className="w-40"
+                    placeholder="MER-001-2024"
+                  />
+                  <Button size="sm" onClick={handleSaveMerchantId}>
+                    <Save className="w-3 h-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setEditingMerchantId(false)}>
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <p className="text-gray-900 font-mono">{merchantIdValue}</p>
+                  <Button variant="ghost" size="sm" onClick={() => setEditingMerchantId(true)}>
+                    <Edit className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">API Key</label>
+              {editingApiKey ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="text"
+                    value={apiKeyValue}
+                    onChange={(e) => setApiKeyValue(e.target.value)}
+                    className="w-60"
+                    placeholder="sk_live_xxxxxxxxxxxxxxxxxxxx"
+                  />
+                  <Button size="sm" onClick={handleSaveApiKey}>
+                    <Save className="w-3 h-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setEditingApiKey(false)}>
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <p className="text-gray-900 font-mono">{apiKeyValue.substring(0, 12)}*********************</p>
+                  <Button variant="ghost" size="sm" onClick={() => setEditingApiKey(true)}>
+                    <Edit className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
